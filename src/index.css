@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+/* ======================================
+   EVAKUACTION — Global Styles
+   ====================================== */
+
+/* Custom fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ======================================
+   Base reset & defaults
+   ====================================== */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #000;
+  color: #fff;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+/* ======================================
+   Selection
+   ====================================== */
+::selection {
+  background-color: rgba(59, 130, 246, 0.3);
+  color: #fff;
+}
+
+/* ======================================
+   Scrollbar (hidden for full-screen game)
+   ====================================== */
+::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ======================================
+   Video element
+   ====================================== */
+video {
+  object-fit: cover;
+}
+
+/* ======================================
+   Canvas overlay
+   ====================================== */
+canvas {
+  image-rendering: auto;
+}
