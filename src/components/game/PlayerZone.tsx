@@ -1,9 +1,10 @@
-import { useMemo, useRef } from 'react'
+import { useMemo, useRef, useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import CardDeck from '../card/CardDeck'
 import AnswerAnchor from '../card/AnswerAnchor'
 import { useDragGesture } from '../../hooks/useDragGesture'
 import { useGameStore } from '../../stores/gameStore'
+import { liveHandDataRef } from '../../stores/gestureStore'
 import type { SoalData, CardPosition } from '../../types/game.types'
 import { DEFAULT_PLAYER_COLORS } from '../../types/gesture.types'
 
@@ -32,6 +33,7 @@ export default function PlayerZone({ player, soal, isEvaluation }: PlayerZonePro
   const playerState = useGameStore((s) => s[player])
   const phase = useGameStore((s) => s.phase)
   const setPlayerReady = useGameStore((s) => s.setPlayerReady)
+  const flipPlayerCards = useGameStore((s) => s.flipPlayerCards)
   const evaluateRonde = useGameStore((s) => s.evaluateRonde)
 
   // Drag gesture hook
@@ -72,6 +74,10 @@ export default function PlayerZone({ player, soal, isEvaluation }: PlayerZonePro
   // Handle "Selesai" button
   const handleFinish = () => {
     setPlayerReady(player, true)
+    flipPlayerCards(player, true)
+    setIsSelesaiFlashing(true)
+    setTimeout(() => setIsSelesaiFlashing(false), 500)
+    
     // If both players are ready, trigger evaluation
     const otherPlayer = player === 'player1' ? 'player2' : 'player1'
     const otherState = useGameStore.getState()[otherPlayer]
@@ -79,6 +85,77 @@ export default function PlayerZone({ player, soal, isEvaluation }: PlayerZonePro
       evaluateRonde()
     }
   }
+
+  const handleFinishRef = useRef(handleFinish)
+  handleFinishRef.current = handleFinish
+
+  const selesaiZoneRef = useRef<HTMLDivElement>(null)
+  const progressCircleRef = useRef<SVGCircleElement>(null)
+  const [isSelesaiFlashing, setIsSelesaiFlashing] = useState(false)
+
+  // Gesture checking loop for the Selesai zone
+  useEffect(() => {
+    let running = true
+    let pinchStartTime = 0
+
+    const checkSelesaiGesture = () => {
+      if (!running) return
+
+      if (allSlotsFilled && !playerState.isReady && phase === 'playing') {
+        const hand = player === 'player1' ? liveHandDataRef.player1 : liveHandDataRef.player2
+        const isPinching = hand?.isPinching ?? false
+
+        const zoneEl = selesaiZoneRef.current
+        
+        let isInside = false
+        if (isPinching && hand && zoneEl) {
+           const w = window.innerWidth
+           const h = window.innerHeight
+           const fingerX = (1 - hand.indexTipX) * w
+           const fingerY = hand.indexTipY * h
+           const rect = zoneEl.getBoundingClientRect()
+           if (fingerX >= rect.left && fingerX <= rect.right && fingerY >= rect.top && fingerY <= rect.bottom) {
+             isInside = true
+           }
+        }
+
+        if (isInside) {
+          if (pinchStartTime === 0) {
+            pinchStartTime = performance.now()
+          } else {
+            const duration = performance.now() - pinchStartTime
+            const progress = Math.min(duration / 1500, 1)
+            
+            if (progressCircleRef.current) {
+               progressCircleRef.current.style.strokeDashoffset = `${100 - (progress * 100)}`
+            }
+
+            if (duration >= 1500) {
+              pinchStartTime = 0
+              if (progressCircleRef.current) progressCircleRef.current.style.strokeDashoffset = '100'
+              handleFinishRef.current()
+            }
+          }
+          if (zoneEl) {
+            zoneEl.style.transform = 'scale(1.05)'
+            zoneEl.style.boxShadow = `0 0 20px ${playerColor}88`
+          }
+        } else {
+          pinchStartTime = 0
+          if (progressCircleRef.current) progressCircleRef.current.style.strokeDashoffset = '100'
+          if (zoneEl) {
+            zoneEl.style.transform = 'scale(1)'
+            zoneEl.style.boxShadow = 'none'
+          }
+        }
+      }
+
+      requestAnimationFrame(checkSelesaiGesture)
+    }
+
+    requestAnimationFrame(checkSelesaiGesture)
+    return () => { running = false }
+  }, [allSlotsFilled, playerState.isReady, phase, player, playerColor])
 
   return (
     <motion.div
@@ -185,66 +262,98 @@ export default function PlayerZone({ player, soal, isEvaluation }: PlayerZonePro
               cardData={placed ? getCardData(placed.id) : null}
               evaluationResult={getEvalResult(slot)}
               onRegister={registerAnchor}
+              onRegisterCard={registerCard}
             />
           )
         })}
       </div>
 
-      {/* ── "Selesai" Button ── */}
+      {/* ── Gesture "Selesai" Zone ── */}
       {allSlotsFilled && !playerState.isReady && phase === 'playing' && (
-        <motion.button
-          initial={{ opacity: 0, scale: 0.8, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
+        <motion.div
+          ref={selesaiZoneRef}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-          onClick={handleFinish}
           style={{
-            marginTop: 8,
-            padding: '10px 28px',
-            borderRadius: 12,
-            border: 'none',
-            background: `linear-gradient(135deg, ${playerColor} 0%, ${playerColor}CC 100%)`,
-            color: '#fff',
-            fontSize: 14,
-            fontWeight: 700,
-            cursor: 'pointer',
-            letterSpacing: '0.04em',
-            boxShadow: `0 4px 16px ${playerColor}44, 0 2px 8px rgba(0,0,0,0.3)`,
-            textTransform: 'uppercase',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.05)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)'
+            marginTop: 16,
+            width: '80%',
+            maxWidth: 300,
+            padding: '12px 24px',
+            borderRadius: 16,
+            background: `linear-gradient(135deg, ${playerColor}22 0%, ${playerColor}44 100%)`,
+            border: `2px solid ${playerColor}88`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 16,
+            position: 'relative',
+            transition: 'transform 0.1s, box-shadow 0.1s',
           }}
         >
-          ✓ Selesai
-        </motion.button>
+          {/* Animated pulsing background when idle */}
+          <motion.div
+            animate={{ opacity: [0.3, 0.6, 0.3] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              borderRadius: 16,
+              background: playerColor,
+              filter: 'blur(10px)',
+              zIndex: -1,
+            }}
+          />
+          
+          {/* Progress Circular Icon */}
+          <div style={{ position: 'relative', width: 32, height: 32 }}>
+            <svg width="32" height="32" viewBox="0 0 36 36" style={{ transform: 'rotate(-90deg)' }}>
+              <circle cx="18" cy="18" r="16" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="4" />
+              <circle
+                ref={progressCircleRef}
+                cx="18" cy="18" r="16" fill="none" stroke="#fff" strokeWidth="4"
+                strokeDasharray="100" strokeDashoffset="100"
+                style={{ transition: 'stroke-dashoffset 0.05s linear' }}
+              />
+            </svg>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>
+              ✊
+            </div>
+          </div>
+
+          <span style={{ fontSize: 16, fontWeight: 700, color: '#fff', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            Jepit untuk Selesai
+          </span>
+        </motion.div>
       )}
 
-      {/* ── Waiting indicator ── */}
+      {/* ── Ready Status / Waiting indicator ── */}
       {playerState.isReady && phase === 'playing' && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1, backgroundColor: isSelesaiFlashing ? 'rgba(34, 197, 94, 0.8)' : 'rgba(34, 197, 94, 0.15)' }}
+          transition={{ duration: 0.3 }}
           style={{
-            marginTop: 8,
-            padding: '8px 20px',
-            borderRadius: 10,
-            backgroundColor: 'rgba(34, 197, 94, 0.15)',
-            border: '1px solid rgba(34, 197, 94, 0.3)',
-            fontSize: 11,
-            fontWeight: 600,
-            color: '#22C55E',
-            letterSpacing: '0.03em',
+            marginTop: 16,
+            padding: '12px 24px',
+            borderRadius: 16,
+            border: '2px solid rgba(34, 197, 94, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
           }}
         >
-          <motion.span
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          >
-            Menunggu pemain lain...
-          </motion.span>
+          <span style={{ fontSize: 18 }}>✓</span>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#22C55E' }}>SIAP!</span>
+            <motion.span
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              style={{ fontSize: 11, color: '#22C55E', opacity: 0.8 }}
+            >
+              Menunggu lawan...
+            </motion.span>
+          </div>
         </motion.div>
       )}
     </motion.div>

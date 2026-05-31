@@ -36,6 +36,8 @@ export interface CardPosition {
   owner: 'player1' | 'player2'
   /** null jika belum di-drop ke anchor */
   anchorSlot: number | null
+  /** true jika kartu sudah dibalik face-down (setelah ready) */
+  isFaceDown?: boolean
 }
 
 /** Phase permainan */
@@ -68,7 +70,9 @@ export interface GameStore {
   setCurrentSoal: (soal: SoalData) => void
   placeCard: (player: 'player1' | 'player2', cardId: string, slot: number) => void
   removeCard: (player: 'player1' | 'player2', cardId: string) => void
+  returnCardToDeck: (player: 'player1' | 'player2', cardId: string) => void
   setPlayerReady: (player: 'player1' | 'player2', ready: boolean) => void
+  flipPlayerCards: (player: 'player1' | 'player2', isFaceDown: boolean) => void
   nextRonde: () => void
   resetGame: () => void
   decrementTimer: () => void

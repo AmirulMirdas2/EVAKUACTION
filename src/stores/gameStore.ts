@@ -89,6 +89,25 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     }),
 
+  returnCardToDeck: (player, cardId) =>
+    set((state) => {
+      const playerState = state[player]
+      return {
+        [player]: {
+          ...playerState,
+          cardsPlaced: playerState.cardsPlaced.filter((c) => c.id !== cardId),
+        },
+      }
+    }),
+
+  flipPlayerCards: (player, isFaceDown) =>
+    set((state) => ({
+      [player]: {
+        ...state[player],
+        cardsPlaced: state[player].cardsPlaced.map(c => ({ ...c, isFaceDown }))
+      }
+    })),
+
   setPlayerReady: (player, ready) =>
     set((state) => ({
       [player]: {
@@ -144,11 +163,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
           ...state.player1,
           score: state.player1.score + p1Score,
           isReady: true,
+          cardsPlaced: state.player1.cardsPlaced.map(c => ({ ...c, isFaceDown: false }))
         },
         player2: {
           ...state.player2,
           score: state.player2.score + p2Score,
           isReady: true,
+          cardsPlaced: state.player2.cardsPlaced.map(c => ({ ...c, isFaceDown: false }))
         },
       }
     }),

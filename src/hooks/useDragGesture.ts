@@ -66,6 +66,41 @@ export function useDragGesture(
   // Track placed cards via ref to avoid stale closure issues
   const placedCardsRef = useRef<Set<string>>(new Set())
 
+  // Get placed cards from game store for this player
+  const cardsPlaced = useGameStore((state) => state[player].cardsPlaced)
+
+  // Sync placedCardsRef with game store to handle swaps properly
+  useEffect(() => {
+    const currentPlacedIds = new Set(cardsPlaced.map((c) => c.id))
+
+    // Check for cards that were in placedCardsRef but are no longer in cardsPlaced (swapped out)
+    for (const placedId of placedCardsRef.current) {
+      if (!currentPlacedIds.has(placedId)) {
+        placedCardsRef.current.delete(placedId)
+
+        // Reset DOM for swapped out card
+        const cardEl = document.getElementById(placedId)
+        if (cardEl) {
+          cardEl.style.position = ''
+          cardEl.style.left = ''
+          cardEl.style.top = ''
+          cardEl.style.width = ''
+          cardEl.style.height = ''
+          cardEl.style.zIndex = ''
+          cardEl.style.margin = ''
+          cardEl.style.transform = ''
+          cardEl.style.transition = ''
+          cardEl.classList.remove('card-placed')
+        }
+      }
+    }
+
+    // Add any new cards to placedCardsRef
+    for (const cardId of currentPlacedIds) {
+      placedCardsRef.current.add(cardId)
+    }
+  }, [cardsPlaced])
+
   /**
    * Register a card DOM element for hit-testing.
    */
@@ -163,8 +198,9 @@ export function useDragGesture(
   const hitTestCards = useCallback(
     (px: number, py: number): { cardId: string; element: HTMLElement } | null => {
       for (const [cardId, element] of cardElementsRef.current.entries()) {
-        // Skip cards already placed in anchors
-        if (placedCardsRef.current.has(cardId)) continue
+        // Skip if face down (player is ready)
+        const isFaceDown = cardsPlaced.find(c => c.id === cardId)?.isFaceDown
+        if (isFaceDown) continue
 
         const rect = element.getBoundingClientRect()
         if (px >= rect.left && px <= rect.right && py >= rect.top && py <= rect.bottom) {
@@ -308,7 +344,7 @@ export function useDragGesture(
 
             // Place card in game store
             useGameStore.getState().placeCard(player, ds.cardId, droppedSlot)
-            placedCardsRef.current.add(ds.cardId)
+            // placedCardsRef will be updated via useEffect when cardsPlaced changes
           } else {
             // ── Return card to origin with spring animation ──
             ds.element.style.transition = 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)'

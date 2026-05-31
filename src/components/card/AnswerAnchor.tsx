@@ -16,6 +16,8 @@ interface AnswerAnchorProps {
   evaluationResult?: 'correct' | 'incorrect' | null
   /** Register this anchor's DOM element for hit-testing */
   onRegister?: (slot: number, element: HTMLElement | null) => void
+  /** Register the placed card for hit-testing */
+  onRegisterCard?: (cardId: string, element: HTMLElement | null) => void
 }
 
 /**
@@ -36,6 +38,7 @@ function AnswerAnchorComponent({
   cardData,
   evaluationResult,
   onRegister,
+  onRegisterCard,
 }: AnswerAnchorProps) {
   const anchorRef = useRef<HTMLDivElement>(null)
 
@@ -119,8 +122,12 @@ function AnswerAnchorComponent({
         {placedCard && cardData ? (
           /* ── Filled state: show placed card info ── */
           <motion.div
+            ref={(el) => {
+              if (onRegisterCard) onRegisterCard(placedCard.id, el)
+            }}
+            data-card-id={placedCard.id}
             initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
+            animate={{ opacity: 1, scale: 1, rotateY: placedCard.isFaceDown ? 180 : 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             style={{
               width: '100%',
@@ -130,65 +137,85 @@ function AnswerAnchorComponent({
               alignItems: 'center',
               justifyContent: 'center',
               padding: 8,
+              transformStyle: 'preserve-3d',
+              position: 'relative',
+              backgroundColor: placedCard.isFaceDown ? 'transparent' : 'inherit',
             }}
           >
-            {/* Mini card preview */}
-            <div
-              style={{
-                width: 50,
-                height: 50,
-                borderRadius: 8,
-                background: `linear-gradient(135deg, ${placeholderColor}44 0%, ${placeholderColor}22 100%)`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 6,
-              }}
-            >
-              <span style={{ fontSize: 24 }}>{emoji}</span>
-            </div>
-            <span
-              style={{
-                fontSize: 8,
-                color: 'rgba(255,255,255,0.8)',
-                textAlign: 'center',
-                lineHeight: 1.3,
-                display: '-webkit-box',
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                fontWeight: 500,
-              }}
-            >
-              {cardData.label}
-            </span>
-
-            {/* Evaluation badge */}
-            {evaluationResult && (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 12 }}
+            {/* ── Front Face ── */}
+            <div style={{
+              position: 'absolute', inset: 0, backfaceVisibility: 'hidden',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 8
+            }}>
+              {/* Mini card preview */}
+              <div
                 style={{
-                  position: 'absolute',
-                  top: 6,
-                  right: 6,
-                  width: 22,
-                  height: 22,
-                  borderRadius: '50%',
-                  backgroundColor: evaluationResult === 'correct' ? '#22C55E' : '#EF4444',
+                  width: 50,
+                  height: 50,
+                  borderRadius: 8,
+                  background: `linear-gradient(135deg, ${placeholderColor}44 0%, ${placeholderColor}22 100%)`,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: 13,
-                  fontWeight: 700,
-                  color: '#fff',
-                  boxShadow: `0 0 10px ${evaluationResult === 'correct' ? 'rgba(34,197,94,0.5)' : 'rgba(239,68,68,0.5)'}`,
+                  marginBottom: 6,
                 }}
               >
-                {evaluationResult === 'correct' ? '✓' : '✗'}
-              </motion.div>
-            )}
+                <span style={{ fontSize: 24 }}>{emoji}</span>
+              </div>
+              <span
+                style={{
+                  fontSize: 8,
+                  color: 'rgba(255,255,255,0.8)',
+                  textAlign: 'center',
+                  lineHeight: 1.3,
+                  display: '-webkit-box',
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  fontWeight: 500,
+                }}
+              >
+                {cardData.label}
+              </span>
+
+              {/* Evaluation badge */}
+              {evaluationResult && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 12 }}
+                  style={{
+                    position: 'absolute',
+                    top: 6,
+                    right: 6,
+                    width: 22,
+                    height: 22,
+                    borderRadius: '50%',
+                    backgroundColor: evaluationResult === 'correct' ? '#22C55E' : '#EF4444',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: '#fff',
+                    boxShadow: `0 0 10px ${evaluationResult === 'correct' ? 'rgba(34,197,94,0.5)' : 'rgba(239,68,68,0.5)'}`,
+                  }}
+                >
+                  {evaluationResult === 'correct' ? '✓' : '✗'}
+                </motion.div>
+              )}
+            </div>
+
+            {/* ── Back Face (Face Down) ── */}
+            <div style={{
+              position: 'absolute', inset: 0, backfaceVisibility: 'hidden', transform: 'rotateY(180deg)',
+              background: `linear-gradient(135deg, ${playerColor} 0%, ${playerColor}44 100%)`,
+              borderRadius: 14,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: `inset 0 0 20px ${playerColor}88`,
+            }}>
+              <span style={{ fontSize: 32, opacity: 0.5 }}>🛡️</span>
+            </div>
           </motion.div>
         ) : (
           /* ── Empty state: show slot number ── */
