@@ -1,0 +1,122 @@
+[
+  {
+    "id": "diag-01",
+    "pertanyaan": "Apa tindakan pertama yang harus dilakukan saat gempa bumi terjadi?",
+    "pilihan": [
+      { "id": "a", "teks": "Berlari keluar gedung secepat mungkin" },
+      { "id": "b", "teks": "Berlindung di bawah meja dan lindungi kepala" },
+      { "id": "c", "teks": "Bersembunyi di dalam lemari" },
+      { "id": "d", "teks": "Naik ke lantai atas gedung" }
+    ],
+    "jawaban_benar": "b",
+    "penjelasan": "Berlindung di bawah meja melindungi tubuh dari reruntuhan. Prinsip Drop, Cover, Hold On adalah prosedur standar BNPB saat gempa."
+  },
+  {
+    "id": "diag-02",
+    "pertanyaan": "Apa tanda alam yang menunjukkan kemungkinan tsunami akan terjadi?",
+    "pilihan": [
+      { "id": "a", "teks": "Langit menjadi sangat cerah" },
+      { "id": "b", "teks": "Burung-burung terbang rendah" },
+      { "id": "c", "teks": "Air laut surut secara tiba-tiba dan drastis" },
+      { "id": "d", "teks": "Angin bertiup sangat kencang dari darat" }
+    ],
+    "jawaban_benar": "c",
+    "penjelasan": "Air laut yang surut mendadak merupakan salah satu tanda peringatan alami tsunami menurut BMKG dan BNPB."
+  },
+  {
+    "id": "diag-03",
+    "pertanyaan": "Saat terjadi banjir, mengapa kita harus mematikan aliran listrik terlebih dahulu?",
+    "pilihan": [
+      { "id": "a", "teks": "Agar tagihan listrik tidak membengkak" },
+      { "id": "b", "teks": "Untuk mencegah bahaya kesetrum dan korsleting" },
+      { "id": "c", "teks": "Supaya lampu tidak menyala dan menghemat energi" },
+      { "id": "d", "teks": "Karena peralatan elektronik bisa meledak" }
+    ],
+    "jawaban_benar": "b",
+    "penjelasan": "Air merupakan konduktor listrik. Jika listrik tidak dimatikan saat banjir, risiko kesetrum dan korsleting sangat tinggi sesuai pedoman BNPB."
+  },
+  {
+    "id": "diag-04",
+    "pertanyaan": "Apa yang harus dilakukan jika melihat tanda-tanda tanah longsor seperti retakan tanah dan pohon miring?",
+    "pilihan": [
+      { "id": "a", "teks": "Mendekati retakan untuk melihat lebih jelas" },
+      { "id": "b", "teks": "Menunggu sampai hujan berhenti" },
+      { "id": "c", "teks": "Segera menjauhi area lereng dan melaporkan ke petugas" },
+      { "id": "d", "teks": "Menutup retakan dengan tanah agar tidak melebar" }
+    ],
+    "jawaban_benar": "c",
+    "penjelasan": "Retakan tanah dan pohon miring adalah tanda awal longsor. Segera jauhi area rawan dan laporkan ke RT/RW atau BPBD setempat."
+  },
+  {
+    "id": "diag-05",
+    "pertanyaan": "Saat status gunung berapi dinaikkan menjadi Siaga (Level III), apa yang harus dipersiapkan?",
+    "pilihan": [
+      { "id": "a", "teks": "Mendekati gunung untuk mengamati aktivitas vulkanik" },
+      { "id": "b", "teks": "Menyiapkan tas siaga berisi masker, obat, dokumen penting, dan makanan" },
+      { "id": "c", "teks": "Tetap beraktivitas normal dan mengabaikan peringatan" },
+      { "id": "d", "teks": "Menyiapkan kamera untuk mendokumentasikan letusan" }
+    ],
+    "jawaban_benar": "b",
+    "penjelasan": "Pada Level Siaga, masyarakat harus menyiapkan tas siaga berisi kebutuhan darurat sesuai pedoman PVMBG dan BNPB."
+  },
+  {
+    "id": "diag-06",
+    "pertanyaan": "Ke arah mana sebaiknya kita mengungsi saat terjadi erupsi gunung berapi?",
+    "pilihan": [
+      { "id": "a", "teks": "Searah dengan aliran awan panas" },
+      { "id": "b", "teks": "Menuju puncak gunung untuk melihat kondisi" },
+      { "id": "c", "teks": "Tegak lurus dari jalur aliran awan panas" },
+      { "id": "d", "teks": "Berdiam di dalam rumah dan menutup semua pintu" }
+    ],
+    "jawaban_benar": "c",
+    "penjelasan": "Evakuasi harus dilakukan tegak lurus dari jalur awan panas (piroklastik), bukan searah maupun berlawanan arah."
+  },
+  {
+    "id": "diag-07",
+    "pertanyaan": "Mengapa kita TIDAK boleh menggunakan lift saat terjadi gempa bumi?",
+    "pilihan": [
+      { "id": "a", "teks": "Karena lift bergerak terlalu lambat" },
+      { "id": "b", "teks": "Karena lift bisa macet dan terjebak akibat gangguan listrik" },
+      { "id": "c", "teks": "Karena lift hanya untuk petugas darurat" },
+      { "id": "d", "teks": "Karena lift tidak memiliki AC" }
+    ],
+    "jawaban_benar": "b",
+    "penjelasan": "Lift dapat macet akibat gangguan listrik dan kerusakan struktur saat gempa, menyebabkan penumpang terjebak. Gunakan tangga darurat."
+  },
+  {
+    "id": "diag-08",
+    "pertanyaan": "Apa yang dimaksud dengan titik kumpul evakuasi?",
+    "pilihan": [
+      { "id": "a", "teks": "Tempat untuk berkumpul dan berfoto setelah bencana" },
+      { "id": "b", "teks": "Lokasi yang ditentukan untuk berkumpul setelah evakuasi agar mudah dihitung dan didata" },
+      { "id": "c", "teks": "Gedung tertinggi di sekitar area bencana" },
+      { "id": "d", "teks": "Area parkir kendaraan darurat" }
+    ],
+    "jawaban_benar": "b",
+    "penjelasan": "Titik kumpul evakuasi adalah lokasi aman yang telah ditentukan sebelumnya untuk berkumpul setelah evakuasi agar semua orang bisa dihitung dan didata."
+  },
+  {
+    "id": "diag-09",
+    "pertanyaan": "Saat terjadi tsunami, ke mana kita harus mengungsi?",
+    "pilihan": [
+      { "id": "a", "teks": "Ke pantai untuk melihat kondisi air laut" },
+      { "id": "b", "teks": "Ke dataran tinggi minimal 30 meter di atas permukaan laut" },
+      { "id": "c", "teks": "Ke basement gedung terdekat" },
+      { "id": "d", "teks": "Ke perahu atau kapal di pelabuhan" }
+    ],
+    "jawaban_benar": "b",
+    "penjelasan": "Menurut BNPB, evakuasi tsunami harus ke dataran tinggi minimal 30 meter di atas permukaan laut atau minimal 2 km dari garis pantai."
+  },
+  {
+    "id": "diag-10",
+    "pertanyaan": "Dokumen penting apa yang sebaiknya diselamatkan terlebih dahulu saat terjadi bencana?",
+    "pilihan": [
+      { "id": "a", "teks": "Buku pelajaran dan tugas sekolah" },
+      { "id": "b", "teks": "Koleksi foto dan album keluarga" },
+      { "id": "c", "teks": "Akta kelahiran, KTP, ijazah, dan kartu keluarga" },
+      { "id": "d", "teks": "Majalah dan koran terbaru" }
+    ],
+    "jawaban_benar": "c",
+    "penjelasan": "Dokumen identitas seperti akta kelahiran, KTP, ijazah, dan KK sangat sulit diganti dan diperlukan untuk pendataan korban dan bantuan pascabencana."
+  }
+]

@@ -1,4 +1,5 @@
 import { useEffect, useCallback, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import CameraView from '../camera/CameraView'
 import PlayerZone from './PlayerZone'
@@ -307,6 +308,7 @@ function EvaluationPopup({
  * - Phase transitions (playing → evaluation → next round)
  */
 export default function GameBoard() {
+  const navigate = useNavigate()
   const phase = useGameStore((s) => s.phase)
   const ronde = useGameStore((s) => s.ronde)
   const maxRonde = useGameStore((s) => s.maxRonde)
@@ -319,7 +321,6 @@ export default function GameBoard() {
   const nextRonde = useGameStore((s) => s.nextRonde)
   const decrementTimer = useGameStore((s) => s.decrementTimer)
   const evaluateRonde = useGameStore((s) => s.evaluateRonde)
-  const resetGame = useGameStore((s) => s.resetGame)
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -373,8 +374,8 @@ export default function GameBoard() {
   // Handle next round
   const handleNextRonde = () => {
     if (ronde >= maxRonde) {
-      // Game finished — for now, reset
-      resetGame()
+      // Game finished — navigate to result page
+      navigate('/result')
     } else {
       nextRonde()
     }

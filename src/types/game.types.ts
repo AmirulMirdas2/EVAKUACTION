@@ -40,6 +40,16 @@ export interface CardPosition {
   isFaceDown?: boolean
 }
 
+/** Result of a single round, stored for recap on the result page */
+export interface RondeResult {
+  ronde: number
+  jenisBencana: string
+  player1Score: number
+  player2Score: number
+  player1Cards: { cardId: string; isCorrect: boolean }[]
+  player2Cards: { cardId: string; isCorrect: boolean }[]
+}
+
 /** Phase permainan */
 export type GamePhase = 'diagnostic' | 'playing' | 'evaluation' | 'result'
 
@@ -65,6 +75,10 @@ export interface GameStore {
   /** Timer countdown per ronde (in seconds) */
   timeRemaining: number
   timerEnabled: boolean
+  /** History of each round's results for the result page */
+  rondeHistory: RondeResult[]
+  /** Flag indicating game has finished all rounds */
+  gameFinished: boolean
 
   setPhase: (phase: GamePhase) => void
   setCurrentSoal: (soal: SoalData) => void

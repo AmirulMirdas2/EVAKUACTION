@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { GameStore, SoalData, PlayerState, CardPosition } from '../types/game.types'
+import type { GameStore, SoalData, PlayerState, CardPosition, RondeResult } from '../types/game.types'
 
 /**
  * Default player state factory.
@@ -30,10 +30,26 @@ function calculateScore(cardsPlaced: CardPosition[], soal: SoalData | null): num
 }
 
 /**
+ * Build per-card correctness array for ronde history.
+ */
+function buildCardResults(
+  cardsPlaced: CardPosition[],
+  soal: SoalData
+): { cardId: string; isCorrect: boolean }[] {
+  return cardsPlaced.map((placed) => {
+    const cardData = soal.kartu.find((k) => k.id === placed.id)
+    return {
+      cardId: placed.id,
+      isCorrect: !!(cardData && placed.anchorSlot === cardData.urutan_benar),
+    }
+  })
+}
+
+/**
  * Zustand store for managing game state.
  *
  * Manages game phases, rounds, player states, card placement,
- * scoring, and evaluation logic.
+ * scoring, evaluation logic, and round history for the result page.
  */
 export const useGameStore = create<GameStore>((set, get) => ({
   phase: 'playing',
@@ -44,6 +60,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   player2: createDefaultPlayerState(),
   timeRemaining: 60,
   timerEnabled: true,
+  rondeHistory: [],
+  gameFinished: false,
 
   setPhase: (phase) => set({ phase }),
 
@@ -145,6 +163,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       player1: createDefaultPlayerState(),
       player2: createDefaultPlayerState(),
       timeRemaining: 60,
+      rondeHistory: [],
+      gameFinished: false,
     }),
 
   decrementTimer: () =>
@@ -157,6 +177,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set((state) => {
       const p1Score = calculateScore(state.player1.cardsPlaced, state.currentSoal)
       const p2Score = calculateScore(state.player2.cardsPlaced, state.currentSoal)
+
+      // Build ronde history entry
+      const rondeResult: RondeResult = {
+        ronde: state.ronde,
+        jenisBencana: state.currentSoal?.jenis_bencana || '',
+        player1Score: p1Score,
+        player2Score: p2Score,
+        player1Cards: state.currentSoal
+          ? buildCardResults(state.player1.cardsPlaced, state.currentSoal)
+          : [],
+        player2Cards: state.currentSoal
+          ? buildCardResults(state.player2.cardsPlaced, state.currentSoal)
+          : [],
+      }
+
+      const isLastRonde = state.ronde >= state.maxRonde
+
       return {
         phase: 'evaluation',
         player1: {
@@ -171,6 +208,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
           isReady: true,
           cardsPlaced: state.player2.cardsPlaced.map(c => ({ ...c, isFaceDown: false }))
         },
+        rondeHistory: [...state.rondeHistory, rondeResult],
+        gameFinished: isLastRonde,
       }
     }),
 }))
