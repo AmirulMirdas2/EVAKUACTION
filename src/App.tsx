@@ -1,12 +1,12 @@
-import CameraView from './components/camera/CameraView'
+import GameBoard from './components/game/GameBoard'
 
 /**
  * Main application component.
- * Currently renders the camera gesture detection system as the foundation
- * for the EVAKUACTION educational game.
+ * Renders the GameBoard which integrates the camera system
+ * with the card-based disaster preparedness game.
  */
 function App() {
-  return <CameraView />
+  return <GameBoard />
 }
 
 export default App

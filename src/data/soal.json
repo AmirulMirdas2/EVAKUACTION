@@ -1,0 +1,162 @@
+[
+  {
+    "id": "soal-gempa-01",
+    "skenario": "Gempa bumi tiba-tiba terjadi saat kamu sedang berada di dalam ruang kelas. Susunlah urutan tindakan yang harus dilakukan!",
+    "jenis_bencana": "gempa",
+    "kartu": [
+      {
+        "id": "gempa-01-a",
+        "label": "Berlindung di bawah meja dan lindungi kepala",
+        "image": "/assets/cards/gempa/berlindung-meja.png",
+        "urutan_benar": 1
+      },
+      {
+        "id": "gempa-01-b",
+        "label": "Tetap tenang dan jauhi jendela serta kaca",
+        "image": "/assets/cards/gempa/jauhi-kaca.png",
+        "urutan_benar": 2
+      },
+      {
+        "id": "gempa-01-c",
+        "label": "Evakuasi keluar gedung melalui tangga darurat",
+        "image": "/assets/cards/gempa/evakuasi-tangga.png",
+        "urutan_benar": 3
+      },
+      {
+        "id": "gempa-01-d",
+        "label": "Berkumpul di titik evakuasi yang telah ditentukan",
+        "image": "/assets/cards/gempa/titik-kumpul.png",
+        "urutan_benar": 4
+      }
+    ],
+    "penjelasan_evaluasi": "Saat gempa terjadi, prioritas pertama adalah melindungi diri dari reruntuhan dengan berlindung di bawah meja (Drop, Cover, Hold On). Setelah guncangan berhenti, jauhi benda-benda yang bisa pecah seperti jendela dan kaca. Lalu segera evakuasi melalui tangga darurat — jangan gunakan lift saat terjadi gempa. Terakhir, berkumpul di titik evakuasi yang telah ditentukan dan tunggu instruksi lebih lanjut dari petugas."
+  },
+  {
+    "id": "soal-tsunami-01",
+    "skenario": "Kamu sedang bermain di pantai saat air laut tiba-tiba surut jauh dari biasanya. Susunlah urutan tindakan yang harus dilakukan!",
+    "jenis_bencana": "tsunami",
+    "kartu": [
+      {
+        "id": "tsunami-01-a",
+        "label": "Kenali tanda bahaya: air laut surut secara tiba-tiba",
+        "image": "/assets/cards/tsunami/tanda-bahaya.png",
+        "urutan_benar": 1
+      },
+      {
+        "id": "tsunami-01-b",
+        "label": "Segera lari menjauhi pantai menuju dataran tinggi",
+        "image": "/assets/cards/tsunami/lari-dataran-tinggi.png",
+        "urutan_benar": 2
+      },
+      {
+        "id": "tsunami-01-c",
+        "label": "Jangan kembali ke pantai sampai ada informasi aman",
+        "image": "/assets/cards/tsunami/jangan-kembali.png",
+        "urutan_benar": 3
+      },
+      {
+        "id": "tsunami-01-d",
+        "label": "Dengarkan arahan petugas dan pantau informasi resmi",
+        "image": "/assets/cards/tsunami/pantau-info.png",
+        "urutan_benar": 4
+      }
+    ],
+    "penjelasan_evaluasi": "Air laut yang surut mendadak merupakan salah satu tanda peringatan alami akan terjadinya tsunami. Segera jauhi pantai dan bergerak ke dataran tinggi minimal 30 meter di atas permukaan laut atau 2 km dari garis pantai. Jangan pernah kembali ke pantai sebelum ada pengumuman resmi bahwa kondisi sudah aman dari BMKG atau BNPB. Tetap pantau informasi melalui radio atau media resmi."
+  },
+  {
+    "id": "soal-banjir-01",
+    "skenario": "Hujan deras mengguyur selama berjam-jam dan air mulai memasuki halaman rumahmu. Susunlah urutan tindakan yang harus dilakukan!",
+    "jenis_bencana": "banjir",
+    "kartu": [
+      {
+        "id": "banjir-01-a",
+        "label": "Matikan aliran listrik dan cabut peralatan elektronik",
+        "image": "/assets/cards/banjir/matikan-listrik.png",
+        "urutan_benar": 1
+      },
+      {
+        "id": "banjir-01-b",
+        "label": "Pindahkan dokumen penting dan barang berharga ke tempat tinggi",
+        "image": "/assets/cards/banjir/pindahkan-barang.png",
+        "urutan_benar": 2
+      },
+      {
+        "id": "banjir-01-c",
+        "label": "Segera mengungsi ke tempat yang lebih tinggi dan aman",
+        "image": "/assets/cards/banjir/mengungsi.png",
+        "urutan_benar": 3
+      },
+      {
+        "id": "banjir-01-d",
+        "label": "Hubungi keluarga dan laporkan ke posko bencana terdekat",
+        "image": "/assets/cards/banjir/hubungi-posko.png",
+        "urutan_benar": 4
+      }
+    ],
+    "penjelasan_evaluasi": "Saat banjir mulai memasuki rumah, langkah pertama yang paling krusial adalah mematikan aliran listrik untuk mencegah bahaya kesetrum. Selamatkan dokumen penting seperti akta, ijazah, dan barang berharga ke tempat yang lebih tinggi. Jika air terus naik, segera mengungsi ke tempat aman. Setelah berada di tempat aman, hubungi keluarga untuk memastikan keselamatan dan laporkan kondisi ke posko bencana agar bantuan dapat dikirim."
+  },
+  {
+    "id": "soal-longsor-01",
+    "skenario": "Saat musim hujan, kamu melihat retakan tanah di lereng bukit dekat rumahmu dan pohon-pohon mulai miring. Susunlah urutan tindakan yang harus dilakukan!",
+    "jenis_bencana": "longsor",
+    "kartu": [
+      {
+        "id": "longsor-01-a",
+        "label": "Waspadai tanda longsor: retakan tanah dan pohon miring",
+        "image": "/assets/cards/longsor/tanda-longsor.png",
+        "urutan_benar": 1
+      },
+      {
+        "id": "longsor-01-b",
+        "label": "Segera jauhi area lereng dan menjauhi aliran sungai",
+        "image": "/assets/cards/longsor/jauhi-lereng.png",
+        "urutan_benar": 2
+      },
+      {
+        "id": "longsor-01-c",
+        "label": "Laporkan kondisi ke ketua RT/RW atau petugas BPBD",
+        "image": "/assets/cards/longsor/lapor-petugas.png",
+        "urutan_benar": 3
+      },
+      {
+        "id": "longsor-01-d",
+        "label": "Evakuasi ke posko pengungsian dan hindari area rawan",
+        "image": "/assets/cards/longsor/evakuasi-posko.png",
+        "urutan_benar": 4
+      }
+    ],
+    "penjelasan_evaluasi": "Retakan pada tanah, pohon yang mulai miring, dan suara gemuruh dari lereng merupakan tanda-tanda awal tanah longsor menurut pedoman BNPB. Segera jauhi area lereng dan aliran sungai karena material longsor sering mengikuti jalur air. Laporkan kondisi ini kepada ketua RT/RW atau petugas BPBD setempat agar peringatan dini dapat dikeluarkan. Kemudian segera evakuasi ke posko pengungsian yang telah ditentukan dan jangan kembali ke area rawan hingga dinyatakan aman oleh petugas."
+  },
+  {
+    "id": "soal-gunungapi-01",
+    "skenario": "Status gunung berapi di dekat kotamu dinaikkan menjadi Siaga (Level III) dan terdengar suara gemuruh dari puncak gunung. Susunlah urutan tindakan yang harus dilakukan!",
+    "jenis_bencana": "gunung_api",
+    "kartu": [
+      {
+        "id": "gunungapi-01-a",
+        "label": "Siapkan tas siaga berisi masker, obat, dokumen, dan makanan",
+        "image": "/assets/cards/gunung-api/tas-siaga.png",
+        "urutan_benar": 1
+      },
+      {
+        "id": "gunungapi-01-b",
+        "label": "Pantau informasi resmi dari PVMBG dan ikuti arahan BPBD",
+        "image": "/assets/cards/gunung-api/pantau-pvmbg.png",
+        "urutan_benar": 2
+      },
+      {
+        "id": "gunungapi-01-c",
+        "label": "Evakuasi menjauhi gunung ke arah tegak lurus jalur awan panas",
+        "image": "/assets/cards/gunung-api/evakuasi-tegak-lurus.png",
+        "urutan_benar": 3
+      },
+      {
+        "id": "gunungapi-01-d",
+        "label": "Lindungi diri dari abu vulkanik dengan masker dan kacamata",
+        "image": "/assets/cards/gunung-api/lindungi-abu.png",
+        "urutan_benar": 4
+      }
+    ],
+    "penjelasan_evaluasi": "Ketika status gunung berapi dinaikkan menjadi Siaga (Level III), segera siapkan tas siaga berisi kebutuhan penting: masker N95, obat-obatan, dokumen penting, makanan, dan air minum. Pantau terus informasi resmi dari Pusat Vulkanologi dan Mitigasi Bencana Geologi (PVMBG) serta ikuti arahan BPBD. Jika diperintahkan evakuasi, bergeraklah tegak lurus dari jalur awan panas (jangan berlari searah aliran piroklastik). Gunakan masker dan kacamata untuk melindungi diri dari abu vulkanik yang dapat mengganggu pernapasan dan penglihatan."
+  }
+]

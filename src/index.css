@@ -1,11 +1,11 @@
+/* Custom fonts — must precede all other rules */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @import "tailwindcss";
 
 /* ======================================
    EVAKUACTION — Global Styles
    ====================================== */
-
-/* Custom fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 /* ======================================
    Base reset & defaults
@@ -68,4 +68,68 @@ video {
    ====================================== */
 canvas {
   image-rendering: auto;
+}
+
+/* ======================================
+   Card drag & drop states
+   ====================================== */
+
+/* Card being dragged — applied via JS */
+.card-dragging {
+  opacity: 0.9 !important;
+  z-index: 100 !important;
+  cursor: grabbing !important;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.5))
+    drop-shadow(0 0 12px rgba(255, 255, 255, 0.1));
+  pointer-events: none;
+}
+
+/* Card placed in anchor slot */
+.card-placed {
+  cursor: default !important;
+  pointer-events: none;
+}
+
+/* ======================================
+   Anchor slot hover states
+   ====================================== */
+
+/* When a card is being dragged over an anchor */
+.anchor-hover {
+  border-style: solid !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1),
+    inset 0 0 20px rgba(255, 255, 255, 0.05) !important;
+  transform: scale(1.03);
+  transition: all 0.15s ease !important;
+}
+
+.anchor-hover .anchor-hover-overlay {
+  opacity: 1 !important;
+}
+
+/* ======================================
+   Card component hover via gesture
+   ====================================== */
+.card-component {
+  transition: transform 0.12s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  will-change: transform, opacity;
+}
+
+/* ======================================
+   Smooth scrollbar for evaluation popup
+   ====================================== */
+.eval-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.eval-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+}
+
+.eval-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
 }
