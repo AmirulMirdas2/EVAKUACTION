@@ -1,5 +1,5 @@
 import { useRef, useCallback, useEffect } from 'react'
-import { useGestureStore } from '../stores/gestureStore'
+import { liveHandDataRef } from '../stores/gestureStore'
 import { useGameStore } from '../stores/gameStore'
 
 /**
@@ -9,18 +9,14 @@ import { useGameStore } from '../stores/gameStore'
 interface DragState {
   cardId: string
   /** The DOM element being dragged */
-  element: HTMLElement | null
+  element: HTMLElement
   /** Whether the card is currently being dragged */
   isDragging: boolean
-  /** The original position before drag started */
-  originX: number
-  originY: number
-  /** Current drag position */
+  /** The original bounding rect before drag started */
+  originRect: DOMRect
+  /** Current finger position in viewport pixels */
   currentX: number
   currentY: number
-  /** Offset between finger and card center when grab started */
-  offsetX: number
-  offsetY: number
 }
 
 /**
@@ -36,6 +32,12 @@ interface AnchorRect {
   centerY: number
 }
 
+// Card dimensions (must match Card.tsx)
+const CARD_WIDTH = 120
+const CARD_HEIGHT = 160
+const CARD_HALF_W = CARD_WIDTH / 2
+const CARD_HALF_H = CARD_HEIGHT / 2
+
 /**
  * Custom hook that connects gesture data from gestureStore with drag & drop
  * logic for virtual cards.
@@ -43,7 +45,8 @@ interface AnchorRect {
  * Performance strategy:
  * - All drag positions are tracked via useRef, NOT useState
  * - Card positions are updated via direct DOM transform manipulation
- * - React re-renders are only triggered for state transitions (pickup, drop)
+ * - Reads from liveHandDataRef (updated every MediaPipe frame) — NOT from
+ *   the Zustand store which only updates on pinch/zone changes
  * - Uses requestAnimationFrame for smooth 30fps+ updates
  *
  * @param player - Which player this hook instance serves ('player1' | 'player2')
@@ -101,12 +104,17 @@ export function useDragGesture(
   }, [])
 
   /**
-   * Update all anchor rects (call on resize/layout changes).
+   * Update all anchor rects — call on resize/layout changes.
    */
   const updateAnchorRects = useCallback(() => {
-    // This is called when we need to refresh anchor positions
-    // Individual anchors re-register via registerAnchor
-  }, [])
+    // Re-read bounding rects for all registered anchors
+    document.querySelectorAll(`[data-anchor-player="${player}"]`).forEach((el) => {
+      const slot = parseInt(el.getAttribute('data-anchor-slot') ?? '0', 10)
+      if (slot > 0) {
+        registerAnchor(slot, el as HTMLElement)
+      }
+    })
+  }, [player, registerAnchor])
 
   /**
    * Mark a card as placed (so it can't be dragged again).
@@ -123,33 +131,39 @@ export function useDragGesture(
   }, [])
 
   /**
-   * Convert normalized hand coordinates (0-1) to pixel coordinates
-   * relative to the viewport.
+   * Convert normalized hand coordinates (0-1) to viewport pixel coordinates.
+   *
+   * MediaPipe returns raw coordinates in camera space.
+   * The video element is rendered mirrored (scaleX(-1)), so to map the
+   * raw coordinate to the mirrored viewport position we flip X: (1 - normX).
+   *
+   * Uses the container's bounding rect as the coordinate space, since the
+   * camera feed may not exactly match window.innerWidth/innerHeight.
    */
   const normalizedToPixel = useCallback(
     (normX: number, normY: number): { x: number; y: number } => {
-      // The camera feed covers the full viewport
-      const viewportW = window.innerWidth
-      const viewportH = window.innerHeight
+      // Use the full viewport as reference since the camera covers the full screen
+      const w = window.innerWidth
+      const h = window.innerHeight
 
-      // Mirror mode: the gesture store already provides raw coords,
-      // but the video is mirrored. So we need to flip X.
+      // Flip X to match the mirrored video display
       const mirroredX = 1 - normX
+
       return {
-        x: mirroredX * viewportW,
-        y: normY * viewportH,
+        x: mirroredX * w,
+        y: normY * h,
       }
     },
     []
   )
 
   /**
-   * Check if a point is over any card element.
+   * Check if a viewport point is over any registered card element.
    */
   const hitTestCards = useCallback(
     (px: number, py: number): { cardId: string; element: HTMLElement } | null => {
       for (const [cardId, element] of cardElementsRef.current.entries()) {
-        // Skip placed cards
+        // Skip cards already placed in anchors
         if (placedCardsRef.current.has(cardId)) continue
 
         const rect = element.getBoundingClientRect()
@@ -163,24 +177,29 @@ export function useDragGesture(
   )
 
   /**
-   * Check if a point is over any anchor slot.
+   * Check if a viewport point is over any anchor slot.
+   * Re-reads bounding rects live for accuracy.
    */
   const hitTestAnchors = useCallback((px: number, py: number): number | null => {
-    for (const anchor of anchorRectsRef.current) {
-      if (
-        px >= anchor.left &&
-        px <= anchor.right &&
-        py >= anchor.top &&
-        py <= anchor.bottom
-      ) {
-        return anchor.slot
+    // Re-read anchor positions live (they may shift due to layout changes)
+    const anchors = document.querySelectorAll(`[data-anchor-player="${player}"]`)
+    for (const el of anchors) {
+      const slot = parseInt(el.getAttribute('data-anchor-slot') ?? '0', 10)
+      if (slot <= 0) continue
+      const rect = el.getBoundingClientRect()
+      if (px >= rect.left && px <= rect.right && py >= rect.top && py <= rect.bottom) {
+        return slot
       }
     }
     return null
-  }, [])
+  }, [player])
 
   /**
-   * Main gesture processing loop — runs via requestAnimationFrame.
+   * Main gesture processing loop — runs EVERY FRAME via requestAnimationFrame.
+   *
+   * CRITICAL: Reads hand position from liveHandDataRef (updated every MediaPipe frame),
+   * NOT from the Zustand store which only updates on pinch/zone state changes.
+   * This ensures the dragged card follows the finger in real-time.
    */
   useEffect(() => {
     let running = true
@@ -188,8 +207,8 @@ export function useDragGesture(
     const processGesture = () => {
       if (!running) return
 
-      const gestureState = useGestureStore.getState()
-      const hand = player === 'player1' ? gestureState.player1Hand : gestureState.player2Hand
+      // ── Read live hand data (updated every frame by useMediaPipe) ──
+      const hand = player === 'player1' ? liveHandDataRef.player1 : liveHandDataRef.player2
       const isPinching = hand?.isPinching ?? false
 
       if (hand) {
@@ -205,54 +224,52 @@ export function useDragGesture(
               cardId: hit.cardId,
               element: hit.element,
               isDragging: true,
-              originX: rect.left,
-              originY: rect.top,
+              originRect: rect,
               currentX: fingerX,
               currentY: fingerY,
-              offsetX: fingerX - (rect.left + rect.width / 2),
-              offsetY: fingerY - (rect.top + rect.height / 2),
             }
             // Apply drag visual state immediately
-            hit.element.style.zIndex = '100'
+            hit.element.style.position = 'fixed'
+            hit.element.style.left = `${fingerX - CARD_HALF_W}px`
+            hit.element.style.top = `${fingerY - CARD_HALF_H}px`
+            hit.element.style.width = `${CARD_WIDTH}px`
+            hit.element.style.height = `${CARD_HEIGHT}px`
+            hit.element.style.zIndex = '999'
             hit.element.style.opacity = '0.9'
-            hit.element.style.transform = `translate(${fingerX - rect.width / 2 - rect.left}px, ${fingerY - rect.height / 2 - rect.top}px) scale(1.1)`
+            hit.element.style.transform = 'scale(1.1)'
             hit.element.style.transition = 'none'
+            hit.element.style.margin = '0'
             hit.element.classList.add('card-dragging')
           }
         }
 
-        // ── DURING DRAG: update card position ──
+        // ── DURING DRAG: update card position every frame ──
         if (isPinching && dragStateRef.current?.isDragging) {
           const ds = dragStateRef.current
-          if (ds.element) {
-            const baseRect = ds.element.parentElement?.getBoundingClientRect()
-            if (baseRect) {
-              const tx = fingerX - ds.offsetX - baseRect.left - ds.element.offsetWidth / 2
-              const ty = fingerY - ds.offsetY - baseRect.top - ds.element.offsetHeight / 2
-              ds.element.style.transform = `translate(${tx}px, ${ty}px) scale(1.1)`
-              ds.currentX = fingerX
-              ds.currentY = fingerY
-            }
+          // Move card so its center follows the fingertip
+          ds.element.style.left = `${fingerX - CARD_HALF_W}px`
+          ds.element.style.top = `${fingerY - CARD_HALF_H}px`
+          ds.currentX = fingerX
+          ds.currentY = fingerY
 
-            // Check anchor hover
-            const hoveredSlot = hitTestAnchors(fingerX, fingerY)
-            if (hoveredSlot !== hoveredAnchorRef.current) {
-              // Remove previous hover
-              if (hoveredAnchorRef.current !== null) {
-                const prevAnchor = document.querySelector(
-                  `[data-anchor-slot="${hoveredAnchorRef.current}"][data-anchor-player="${player}"]`
-                ) as HTMLElement | null
-                prevAnchor?.classList.remove('anchor-hover')
-              }
-              // Add new hover
-              if (hoveredSlot !== null) {
-                const newAnchor = document.querySelector(
-                  `[data-anchor-slot="${hoveredSlot}"][data-anchor-player="${player}"]`
-                ) as HTMLElement | null
-                newAnchor?.classList.add('anchor-hover')
-              }
-              hoveredAnchorRef.current = hoveredSlot
+          // Check anchor hover
+          const hoveredSlot = hitTestAnchors(fingerX, fingerY)
+          if (hoveredSlot !== hoveredAnchorRef.current) {
+            // Remove previous hover highlight
+            if (hoveredAnchorRef.current !== null) {
+              const prevAnchor = document.querySelector(
+                `[data-anchor-slot="${hoveredAnchorRef.current}"][data-anchor-player="${player}"]`
+              ) as HTMLElement | null
+              prevAnchor?.classList.remove('anchor-hover')
             }
+            // Add new hover highlight
+            if (hoveredSlot !== null) {
+              const newAnchor = document.querySelector(
+                `[data-anchor-slot="${hoveredSlot}"][data-anchor-player="${player}"]`
+              ) as HTMLElement | null
+              newAnchor?.classList.add('anchor-hover')
+            }
+            hoveredAnchorRef.current = hoveredSlot
           }
         }
 
@@ -261,7 +278,7 @@ export function useDragGesture(
           const ds = dragStateRef.current
           const droppedSlot = hitTestAnchors(ds.currentX, ds.currentY)
 
-          // Remove anchor hover
+          // Remove anchor hover highlight
           if (hoveredAnchorRef.current !== null) {
             const prevAnchor = document.querySelector(
               `[data-anchor-slot="${hoveredAnchorRef.current}"][data-anchor-player="${player}"]`
@@ -270,36 +287,52 @@ export function useDragGesture(
             hoveredAnchorRef.current = null
           }
 
-          if (droppedSlot !== null && ds.element) {
-            // Snap card to anchor slot
-            ds.element.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease'
-            ds.element.style.opacity = '1'
-            ds.element.style.zIndex = '50'
+          if (droppedSlot !== null) {
+            // ── Snap card to anchor slot ──
+            const anchorEl = document.querySelector(
+              `[data-anchor-slot="${droppedSlot}"][data-anchor-player="${player}"]`
+            ) as HTMLElement | null
+
+            if (anchorEl) {
+              const anchorRect = anchorEl.getBoundingClientRect()
+              ds.element.style.transition = 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+              ds.element.style.left = `${anchorRect.left + (anchorRect.width - CARD_WIDTH) / 2}px`
+              ds.element.style.top = `${anchorRect.top + (anchorRect.height - CARD_HEIGHT) / 2}px`
+              ds.element.style.transform = 'scale(1)'
+              ds.element.style.opacity = '1'
+              ds.element.style.zIndex = '50'
+            }
+
             ds.element.classList.remove('card-dragging')
             ds.element.classList.add('card-placed')
 
             // Place card in game store
             useGameStore.getState().placeCard(player, ds.cardId, droppedSlot)
             placedCardsRef.current.add(ds.cardId)
-
-            // Find anchor element and snap to its position
-            const anchorEl = document.querySelector(
-              `[data-anchor-slot="${droppedSlot}"][data-anchor-player="${player}"]`
-            ) as HTMLElement | null
-            if (anchorEl && ds.element.parentElement) {
-              const anchorRect = anchorEl.getBoundingClientRect()
-              const parentRect = ds.element.parentElement.getBoundingClientRect()
-              const tx = anchorRect.left - parentRect.left + (anchorRect.width - ds.element.offsetWidth) / 2
-              const ty = anchorRect.top - parentRect.top + (anchorRect.height - ds.element.offsetHeight) / 2
-              ds.element.style.transform = `translate(${tx}px, ${ty}px) scale(1)`
-            }
-          } else if (ds.element) {
-            // Return card to origin with spring animation
-            ds.element.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease'
-            ds.element.style.transform = 'translate(0px, 0px) scale(1)'
+          } else {
+            // ── Return card to origin with spring animation ──
+            ds.element.style.transition = 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)'
+            ds.element.style.left = `${ds.originRect.left}px`
+            ds.element.style.top = `${ds.originRect.top}px`
+            ds.element.style.transform = 'scale(1)'
             ds.element.style.opacity = '1'
             ds.element.style.zIndex = '10'
             ds.element.classList.remove('card-dragging')
+
+            // After animation completes, reset to flow layout
+            setTimeout(() => {
+              if (ds.element && !ds.element.classList.contains('card-placed')) {
+                ds.element.style.position = ''
+                ds.element.style.left = ''
+                ds.element.style.top = ''
+                ds.element.style.width = ''
+                ds.element.style.height = ''
+                ds.element.style.zIndex = ''
+                ds.element.style.margin = ''
+                ds.element.style.transform = ''
+                ds.element.style.transition = ''
+              }
+            }, 450)
           }
 
           dragStateRef.current = null
@@ -310,13 +343,30 @@ export function useDragGesture(
         // No hand detected — if was dragging, return card to origin
         if (lastPinchRef.current && dragStateRef.current?.isDragging) {
           const ds = dragStateRef.current
-          if (ds.element) {
-            ds.element.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease'
-            ds.element.style.transform = 'translate(0px, 0px) scale(1)'
-            ds.element.style.opacity = '1'
-            ds.element.style.zIndex = '10'
-            ds.element.classList.remove('card-dragging')
-          }
+          ds.element.style.transition = 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)'
+          ds.element.style.left = `${ds.originRect.left}px`
+          ds.element.style.top = `${ds.originRect.top}px`
+          ds.element.style.transform = 'scale(1)'
+          ds.element.style.opacity = '1'
+          ds.element.style.zIndex = '10'
+          ds.element.classList.remove('card-dragging')
+
+          // Reset to flow layout after animation
+          const el = ds.element
+          setTimeout(() => {
+            if (el && !el.classList.contains('card-placed')) {
+              el.style.position = ''
+              el.style.left = ''
+              el.style.top = ''
+              el.style.width = ''
+              el.style.height = ''
+              el.style.zIndex = ''
+              el.style.margin = ''
+              el.style.transform = ''
+              el.style.transition = ''
+            }
+          }, 450)
+
           dragStateRef.current = null
         }
         lastPinchRef.current = false

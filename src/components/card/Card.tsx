@@ -65,6 +65,7 @@ function CardComponent({
   return (
     <motion.div
       ref={cardRef}
+      id={card.id}
       data-card-id={card.id}
       className={`card-component ${isPlaced ? 'card-placed' : ''}`}
       style={{

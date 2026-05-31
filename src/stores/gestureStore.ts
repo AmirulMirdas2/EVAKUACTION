@@ -2,6 +2,21 @@ import { create } from 'zustand'
 import type { HandData } from '../types/gesture.types'
 
 /**
+ * Live hand data ref — updated every frame by useMediaPipe.
+ * 
+ * This is intentionally OUTSIDE the Zustand store to avoid React re-renders.
+ * The drag gesture hook reads this ref directly in its rAF loop for
+ * real-time finger tracking at full frame rate.
+ */
+export const liveHandDataRef: {
+  player1: HandData | null
+  player2: HandData | null
+} = {
+  player1: null,
+  player2: null,
+}
+
+/**
  * Zustand store for managing gesture state across components.
  * 
  * This store is updated ONLY when pinch state changes to avoid

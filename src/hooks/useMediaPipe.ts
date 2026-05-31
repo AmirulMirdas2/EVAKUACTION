@@ -11,7 +11,7 @@ import {
   DEFAULT_ZONE_BOUNDARIES,
   PINCH_THRESHOLD,
 } from '../types/gesture.types'
-import { useGestureStore } from '../stores/gestureStore'
+import { useGestureStore, liveHandDataRef } from '../stores/gestureStore'
 
 // MediaPipe Hands types (loaded via CDN, not imported)
 interface MPHands {
@@ -189,6 +189,10 @@ export function useMediaPipe(
         }
         // Hands in 'buffer' zone are ignored
       }
+      // ── Update live hand data ref EVERY FRAME (non-reactive) ──
+      // This is read by useDragGesture in its rAF loop for real-time tracking.
+      liveHandDataRef.player1 = p1Hand
+      liveHandDataRef.player2 = p2Hand
 
       // Only update Zustand store when pinch state or zone presence changes
       const p1Pinching = p1Hand?.isPinching ?? false
