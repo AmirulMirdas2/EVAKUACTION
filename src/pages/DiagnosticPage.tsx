@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import DiagnosticQuestion from '../components/diagnostic/DiagnosticQuestion'
 import DiagnosticResult from '../components/diagnostic/DiagnosticResult'
 import { useDiagnosticStore } from '../stores/diagnosticStore'
+import { useGameStore } from '../stores/gameStore'
 
 export default function DiagnosticPage() {
   const [started, setStarted] = useState(false)
@@ -12,6 +13,7 @@ export default function DiagnosticPage() {
   const nextQuestion = useDiagnosticStore((s) => s.nextQuestion)
   const initDiagnostic = useDiagnosticStore((s) => s.initDiagnostic)
   const shuffledQuestions = useDiagnosticStore((s) => s.shuffledQuestions)
+  const resetGame = useGameStore((s) => s.resetGame)
 
   const handleAnswer = (questionId: string, answerId: string) => {
     setAnswer(questionId, answerId)
@@ -20,6 +22,7 @@ export default function DiagnosticPage() {
 
   const handleStart = () => {
     initDiagnostic() // Shuffle questions and options
+    resetGame() // Ensure game state is clean for a new session
     setStarted(true)
   }
 

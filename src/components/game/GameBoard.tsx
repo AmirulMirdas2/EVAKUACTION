@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import CameraView from '../camera/CameraView'
 import PlayerZone from './PlayerZone'
@@ -321,6 +321,18 @@ export default function GameBoard() {
   const decrementTimer = useGameStore((s) => s.decrementTimer)
   const evaluateRonde = useGameStore((s) => s.evaluateRonde)
   const shuffledSoalList = useGameStore((s) => s.shuffledSoalList)
+  const resetGame = useGameStore((s) => s.resetGame)
+
+  const location = useLocation()
+
+  // If navigated here with state.reset = true (from ResultPage), reset the game state safely
+  useEffect(() => {
+    if (location.state?.reset) {
+      resetGame()
+      // Clear the state so it doesn't loop if the user refreshes
+      navigate('/game', { replace: true, state: {} })
+    }
+  }, [location.state, navigate, resetGame])
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 

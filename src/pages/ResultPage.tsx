@@ -24,20 +24,17 @@ export default function ResultPage() {
   const p1Score = useGameStore((s) => s.player1.score)
   const p2Score = useGameStore((s) => s.player2.score)
   const rondeHistory = useGameStore((s) => s.rondeHistory)
-  const resetGame = useGameStore((s) => s.resetGame)
   const resetDiagnostic = useDiagnosticStore((s) => s.resetDiagnostic)
 
   const winner: 'player1' | 'player2' | 'draw' =
     p1Score > p2Score ? 'player1' : p2Score > p1Score ? 'player2' : 'draw'
 
   const handlePlayAgain = () => {
-    resetGame()      // Also re-shuffles soal
-    resetDiagnostic()
-    navigate('/diagnostic')
+    // Navigate to /game and pass a state flag so GameBoard knows to reset
+    navigate('/game', { replace: true, state: { reset: true } })
   }
 
   const handleBackToHome = () => {
-    resetGame()
     resetDiagnostic()
     navigate('/')
   }

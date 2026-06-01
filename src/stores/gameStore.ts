@@ -64,15 +64,28 @@ function buildCardResults(
   cardsPlaced: CardPosition[],
   soal: SoalData
 ): CardResult[] {
-  return cardsPlaced.map((placed) => {
-    const cardData = soal.kartu.find((k) => k.id === placed.id)
+  return soal.kartu.map((card) => {
+    const placed = cardsPlaced.find((p) => p.id === card.id)
+
+    if (!placed || placed.anchorSlot === null) {
+      return {
+        cardId: card.id,
+        cardLabel: card.label,
+        cardImage: card.image,
+        isCorrect: false,
+        wrongSlot: null,
+        correctSlot: card.urutan_benar,
+      }
+    }
+
+    const isCorrect = placed.anchorSlot === card.urutan_benar
     return {
-      cardId: placed.id,
-      cardLabel: cardData?.label ?? placed.id,
-      cardImage: cardData?.image ?? '',
-      isCorrect: !!(cardData && placed.anchorSlot === cardData.urutan_benar),
-      wrongSlot: placed.anchorSlot,
-      correctSlot: cardData?.urutan_benar ?? 0,
+      cardId: card.id,
+      cardLabel: card.label,
+      cardImage: card.image,
+      isCorrect,
+      wrongSlot: isCorrect ? null : placed.anchorSlot,
+      correctSlot: card.urutan_benar,
     }
   })
 }
