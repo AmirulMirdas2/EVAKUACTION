@@ -5,6 +5,19 @@ import { useDiagnosticStore } from '../stores/diagnosticStore'
 import WinnerAnnouncement from '../components/result/WinnerAnnouncement'
 import ScoreBoard from '../components/result/ScoreBoard'
 import RondeSummary from '../components/result/RondeSummary'
+import MistakeAnalysis from '../components/result/MistakeAnalysis'
+
+/**
+ * Stagger delay values for the reveal animation.
+ */
+const STAGGER = {
+  title: 0.1,
+  winner: 0.0,
+  scoreBoard: 0.3,
+  rondeSummary: 0.6,
+  mistakeAnalysis: 0.9,
+  buttons: 1.2,
+}
 
 export default function ResultPage() {
   const navigate = useNavigate()
@@ -18,7 +31,7 @@ export default function ResultPage() {
     p1Score > p2Score ? 'player1' : p2Score > p1Score ? 'player2' : 'draw'
 
   const handlePlayAgain = () => {
-    resetGame()
+    resetGame()      // Also re-shuffles soal
     resetDiagnostic()
     navigate('/diagnostic')
   }
@@ -41,7 +54,6 @@ export default function ResultPage() {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
         background: 'linear-gradient(180deg, #0B0F1A 0%, #111827 40%, #1E293B 100%)',
         padding: '40px 24px',
         overflow: 'auto',
@@ -51,21 +63,53 @@ export default function ResultPage() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
+        transition={{ delay: STAGGER.title }}
         style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 20 }}
       >
         🏆 Hasil Pertandingan
       </motion.div>
 
-      <WinnerAnnouncement winner={winner} p1Score={p1Score} p2Score={p2Score} />
-      <ScoreBoard p1Score={p1Score} p2Score={p2Score} winner={winner} />
-      <RondeSummary rondeHistory={rondeHistory} />
+      {/* Section 1: Winner Announcement */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: STAGGER.winner, duration: 0.5 }}
+      >
+        <WinnerAnnouncement winner={winner} p1Score={p1Score} p2Score={p2Score} />
+      </motion.div>
 
-      {/* Navigation buttons */}
+      {/* Section 2: Score Board */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: STAGGER.scoreBoard, duration: 0.5 }}
+      >
+        <ScoreBoard p1Score={p1Score} p2Score={p2Score} winner={winner} />
+      </motion.div>
+
+      {/* Section 3: Ronde Summary */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: STAGGER.rondeSummary, duration: 0.5 }}
+      >
+        <RondeSummary rondeHistory={rondeHistory} />
+      </motion.div>
+
+      {/* Section 4: Mistake Analysis (NEW) */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: STAGGER.mistakeAnalysis, duration: 0.5 }}
+      >
+        <MistakeAnalysis rondeHistory={rondeHistory} />
+      </motion.div>
+
+      {/* Section 5: Navigation buttons */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.2 }}
+        transition={{ delay: STAGGER.buttons, duration: 0.5 }}
         style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}
       >
         <motion.button

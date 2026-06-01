@@ -31,6 +31,10 @@ export interface DiagnosticStore {
   answers: Record<string, string>
   score: number
   isCompleted: boolean
+  /** Shuffled question list for this diagnostic session */
+  shuffledQuestions: DiagnosticSoal[]
+  /** Initialize diagnostic with shuffled questions and options */
+  initDiagnostic: () => void
   setAnswer: (id: string, answer: string) => void
   nextQuestion: () => void
   calculateScore: () => void

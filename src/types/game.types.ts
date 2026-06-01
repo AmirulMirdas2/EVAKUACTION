@@ -41,13 +41,27 @@ export interface CardPosition {
 }
 
 /** Result of a single round, stored for recap on the result page */
+/** Detail of a single card's placement result */
+export interface CardResult {
+  cardId: string
+  cardLabel: string
+  cardImage: string
+  isCorrect: boolean
+  /** The slot the player placed the card in (null if not placed) */
+  wrongSlot: number | null
+  /** The correct slot for this card */
+  correctSlot: number
+}
+
 export interface RondeResult {
   ronde: number
   jenisBencana: string
+  /** The penjelasan_evaluasi text from the soal */
+  penjelasan: string
   player1Score: number
   player2Score: number
-  player1Cards: { cardId: string; isCorrect: boolean }[]
-  player2Cards: { cardId: string; isCorrect: boolean }[]
+  player1Cards: CardResult[]
+  player2Cards: CardResult[]
 }
 
 /** Phase permainan */
@@ -79,6 +93,8 @@ export interface GameStore {
   rondeHistory: RondeResult[]
   /** Flag indicating game has finished all rounds */
   gameFinished: boolean
+  /** Shuffled soal list for this game session */
+  shuffledSoalList: SoalData[]
 
   setPhase: (phase: GamePhase) => void
   setCurrentSoal: (soal: SoalData) => void

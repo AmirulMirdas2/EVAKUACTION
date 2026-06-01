@@ -3,10 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import DiagnosticQuestion from '../components/diagnostic/DiagnosticQuestion'
 import DiagnosticResult from '../components/diagnostic/DiagnosticResult'
 import { useDiagnosticStore } from '../stores/diagnosticStore'
-import diagnosticSoalData from '../data/diagnosticSoal.json'
-import type { DiagnosticSoal } from '../types/diagnostic.types'
-
-const soalList = diagnosticSoalData as DiagnosticSoal[]
 
 export default function DiagnosticPage() {
   const [started, setStarted] = useState(false)
@@ -14,10 +10,17 @@ export default function DiagnosticPage() {
   const isCompleted = useDiagnosticStore((s) => s.isCompleted)
   const setAnswer = useDiagnosticStore((s) => s.setAnswer)
   const nextQuestion = useDiagnosticStore((s) => s.nextQuestion)
+  const initDiagnostic = useDiagnosticStore((s) => s.initDiagnostic)
+  const shuffledQuestions = useDiagnosticStore((s) => s.shuffledQuestions)
 
   const handleAnswer = (questionId: string, answerId: string) => {
     setAnswer(questionId, answerId)
     nextQuestion()
+  }
+
+  const handleStart = () => {
+    initDiagnostic() // Shuffle questions and options
+    setStarted(true)
   }
 
   const bgStyle: React.CSSProperties = {
@@ -46,7 +49,7 @@ export default function DiagnosticPage() {
               </motion.div>
             ))}
           </div>
-          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setStarted(true)} style={{ padding: '16px 48px', borderRadius: 14, border: 'none', background: 'linear-gradient(135deg, #3B82F6, #6366F1)', color: '#fff', fontSize: 16, fontWeight: 700, cursor: 'pointer', letterSpacing: '0.04em', boxShadow: '0 4px 20px rgba(59,130,246,0.3)', fontFamily: "'Inter', sans-serif" }}>
+          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleStart} style={{ padding: '16px 48px', borderRadius: 14, border: 'none', background: 'linear-gradient(135deg, #3B82F6, #6366F1)', color: '#fff', fontSize: 16, fontWeight: 700, cursor: 'pointer', letterSpacing: '0.04em', boxShadow: '0 4px 20px rgba(59,130,246,0.3)', fontFamily: "'Inter', sans-serif" }}>
             🚀 Mulai Tes
           </motion.button>
         </motion.div>
@@ -62,12 +65,12 @@ export default function DiagnosticPage() {
     )
   }
 
-  const currentSoal = soalList[currentQuestion]
+  const currentSoal = shuffledQuestions[currentQuestion]
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, y: -20 }} style={{ ...bgStyle, padding: '40px 24px' }}>
       <AnimatePresence mode="wait">
         {currentSoal && (
-          <DiagnosticQuestion key={currentSoal.id} soal={currentSoal} questionNumber={currentQuestion + 1} totalQuestions={soalList.length} onAnswer={handleAnswer} />
+          <DiagnosticQuestion key={currentSoal.id} soal={currentSoal} questionNumber={currentQuestion + 1} totalQuestions={shuffledQuestions.length} onAnswer={handleAnswer} />
         )}
       </AnimatePresence>
     </motion.div>

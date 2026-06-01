@@ -7,7 +7,6 @@ import ScenarioDisplay from './ScenarioDisplay'
 import { useGameStore } from '../../stores/gameStore'
 import type { SoalData } from '../../types/game.types'
 import { BENCANA_COLORS, BENCANA_EMOJI } from '../../types/game.types'
-import soalData from '../../data/soal.json'
 
 /**
  * EvaluationPopup — Overlay showing evaluation results and scientific explanation.
@@ -321,17 +320,17 @@ export default function GameBoard() {
   const nextRonde = useGameStore((s) => s.nextRonde)
   const decrementTimer = useGameStore((s) => s.decrementTimer)
   const evaluateRonde = useGameStore((s) => s.evaluateRonde)
+  const shuffledSoalList = useGameStore((s) => s.shuffledSoalList)
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  // Load soal for current ronde
+  // Load soal for current ronde from the shuffled list
   useEffect(() => {
     if (phase === 'playing' && !currentSoal) {
-      const soalList = soalData as SoalData[]
-      const soalIndex = (ronde - 1) % soalList.length
-      setCurrentSoal(soalList[soalIndex])
+      const soalIndex = (ronde - 1) % shuffledSoalList.length
+      setCurrentSoal(shuffledSoalList[soalIndex])
     }
-  }, [phase, ronde, currentSoal, setCurrentSoal])
+  }, [phase, ronde, currentSoal, setCurrentSoal, shuffledSoalList])
 
   // Timer countdown
   useEffect(() => {
