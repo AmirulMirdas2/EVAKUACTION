@@ -3,7 +3,9 @@ import { AnimatePresence } from 'framer-motion'
 import LandingPage from './pages/LandingPage'
 import DiagnosticPage from './pages/DiagnosticPage'
 import ResultPage from './pages/ResultPage'
+import NotFoundPage from './pages/NotFoundPage'
 import GameBoard from './components/game/GameBoard'
+import ErrorBoundary from './components/ErrorBoundary'
 import { useDiagnosticStore } from './stores/diagnosticStore'
 import { useGameStore } from './stores/gameStore'
 
@@ -36,7 +38,7 @@ function AnimatedRoutes() {
         <Route path="/diagnostic" element={<DiagnosticPage />} />
         <Route path="/game" element={<ProtectedGameRoute />} />
         <Route path="/result" element={<ProtectedResultRoute />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </AnimatePresence>
   )
@@ -47,9 +49,11 @@ function AnimatedRoutes() {
  */
 function App() {
   return (
-    <BrowserRouter>
-      <AnimatedRoutes />
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AnimatedRoutes />
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }
 

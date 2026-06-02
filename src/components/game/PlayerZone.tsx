@@ -6,6 +6,7 @@ import { useDragGesture } from '../../hooks/useDragGesture'
 import { useGameStore } from '../../stores/gameStore'
 import { liveHandDataRef } from '../../stores/gestureStore'
 import type { SoalData, CardPosition } from '../../types/game.types'
+import { BENCANA_EMOJI, BENCANA_COLORS } from '../../types/game.types'
 import { DEFAULT_PLAYER_COLORS } from '../../types/gesture.types'
 
 interface PlayerZoneProps {
@@ -228,15 +229,58 @@ export default function PlayerZone({ player, soal, isEvaluation }: PlayerZonePro
         </div>
       </div>
 
+      {/* ── Disaster Label ── */}
+      <div
+        style={{
+          marginBottom: 16,
+          padding: '6px 16px',
+          borderRadius: 20,
+          background: `linear-gradient(90deg, transparent, ${BENCANA_COLORS[soal.jenis_bencana]}33, transparent)`,
+          color: '#fff',
+          fontSize: 14,
+          fontWeight: 700,
+          letterSpacing: '0.05em',
+          textTransform: 'uppercase',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+        }}
+      >
+        <span style={{ fontSize: 18 }}>{BENCANA_EMOJI[soal.jenis_bencana]}</span>
+        {soal.jenis_bencana.replace('_', ' ')} — RONDE {useGameStore((s) => s.ronde)}
+      </div>
+
       {/* ── Card Deck Area ── */}
-      <div style={{ flex: '1 1 auto', display: 'flex', alignItems: 'center' }}>
-        <CardDeck
-          cards={soal.kartu}
-          jenisBencana={soal.jenis_bencana}
-          playerColor={playerColor}
-          placedCardIds={placedCardIds}
-          onRegisterCard={registerCard}
+      <div
+        style={{
+          flex: '1 1 auto',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+          position: 'relative',
+        }}
+      >
+        {/* Semi-transparent backdrop for better visibility against camera feed */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: '0 10%',
+            background: 'radial-gradient(ellipse at center, rgba(15,23,42,0.6) 0%, transparent 70%)',
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
         />
+        <div style={{ zIndex: 1 }}>
+          <CardDeck
+            cards={soal.kartu}
+            jenisBencana={soal.jenis_bencana}
+            playerColor={playerColor}
+            placedCardIds={placedCardIds}
+            onRegisterCard={registerCard}
+          />
+        </div>
       </div>
 
       {/* ── Answer Anchor Area ── */}

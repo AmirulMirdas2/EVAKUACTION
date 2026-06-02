@@ -1,4 +1,4 @@
-import { useEffect, useRef, memo } from 'react'
+import { useEffect, useRef, memo, useState } from 'react'
 import { motion } from 'framer-motion'
 import type { CardData, JenisBencana } from '../../types/game.types'
 import { BENCANA_COLORS, BENCANA_EMOJI } from '../../types/game.types'
@@ -35,7 +35,8 @@ function CardComponent({
   onRegister,
 }: CardProps) {
   const cardRef = useRef<HTMLDivElement>(null)
-  const imgErrorRef = useRef(false)
+  const [imageLoaded, setImageLoaded] = useState(false)
+  const [imageError, setImageError] = useState(false)
 
   // Register card element for hit-testing in useDragGesture
   useEffect(() => {
@@ -99,11 +100,11 @@ function CardComponent({
         ease: [0.34, 1.56, 0.64, 1],
       }}
     >
-      {/* Card image area / placeholder */}
+      {/* Card image area / placeholder (80% of 160 = 128px) */}
       <div
         style={{
           width: '100%',
-          height: 100,
+          height: 128,
           background: `linear-gradient(135deg, ${placeholderColor}33 0%, ${placeholderColor}11 100%)`,
           display: 'flex',
           alignItems: 'center',
@@ -112,64 +113,89 @@ function CardComponent({
           overflow: 'hidden',
         }}
       >
-        {/* Subtle pattern overlay */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: `radial-gradient(circle at 20% 50%, ${placeholderColor}22 0%, transparent 50%), radial-gradient(circle at 80% 30%, ${placeholderColor}18 0%, transparent 40%)`,
-          }}
-        />
+        {/* Subtle pattern overlay (shows when placeholder is active) */}
+        {imageError && (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `radial-gradient(circle at 20% 50%, ${placeholderColor}22 0%, transparent 50%), radial-gradient(circle at 80% 30%, ${placeholderColor}18 0%, transparent 40%)`,
+            }}
+          />
+        )}
 
-        {/* Try to load actual image, fallback to placeholder */}
-        {!imgErrorRef.current ? (
+        {/* Placeholder emoji + label (shows only on error/missing image) */}
+        {imageError && (
+          <div
+            style={{
+              position: 'relative',
+              zIndex: 2,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 4,
+            }}
+          >
+            <span style={{ fontSize: 32 }}>{emoji}</span>
+            <span
+              style={{
+                fontSize: 8,
+                color: placeholderColor,
+                fontWeight: 600,
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
+                opacity: 0.8,
+              }}
+            >
+              {jenisBencana.replace('_', ' ')}
+            </span>
+          </div>
+        )}
+
+        {/* Skeleton Shimmer */}
+        {!imageLoaded && !imageError && (
+          <motion.div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.02) 75%)',
+              backgroundSize: '200% 100%',
+              zIndex: 3,
+            }}
+            animate={{
+              backgroundPosition: ['200% 0', '-200% 0'],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              ease: 'linear',
+            }}
+          />
+        )}
+
+        {/* Actual Image */}
+        {!imageError && (
           <img
             src={card.image}
             alt={card.label}
+            loading="lazy"
             style={{
               width: '100%',
               height: '100%',
               objectFit: 'cover',
               position: 'absolute',
               inset: 0,
+              opacity: imageLoaded ? 1 : 0,
+              transition: 'opacity 0.3s ease-in-out',
+              zIndex: 4,
             }}
-            onError={() => {
-              imgErrorRef.current = true
-              // Force re-render by updating a parent-level state
-              // For simplicity, we hide the img on error via CSS
-              const imgEl = document.querySelector(
-                `[data-card-id="${card.id}"] img`
-              ) as HTMLImageElement | null
-              if (imgEl) imgEl.style.display = 'none'
+            onLoad={() => setImageLoaded(true)}
+            onError={(e) => {
+              setImageError(true)
+              e.currentTarget.style.display = 'none'
             }}
           />
-        ) : null}
-
-        {/* Placeholder emoji + label overlay */}
-        <div
-          style={{
-            position: 'relative',
-            zIndex: 2,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 4,
-          }}
-        >
-          <span style={{ fontSize: 32 }}>{emoji}</span>
-          <span
-            style={{
-              fontSize: 8,
-              color: placeholderColor,
-              fontWeight: 600,
-              letterSpacing: '0.05em',
-              textTransform: 'uppercase',
-              opacity: 0.8,
-            }}
-          >
-            {jenisBencana.replace('_', ' ')}
-          </span>
-        </div>
+        )}
 
         {/* Evaluation badge */}
         {evaluationResult && (
@@ -201,24 +227,26 @@ function CardComponent({
       {/* Card label */}
       <div
         style={{
-          padding: '6px 8px',
+          padding: '4px 6px',
           background: 'linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.9) 100%)',
-          height: 60,
+          height: 32,
           display: 'flex',
           alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
         <span
           style={{
             fontSize: 9,
-            lineHeight: 1.3,
+            lineHeight: 1.2,
             color: 'rgba(255,255,255,0.9)',
             fontWeight: 500,
             display: '-webkit-box',
-            WebkitLineClamp: 3,
+            WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
+            textAlign: 'center',
           }}
         >
           {card.label}

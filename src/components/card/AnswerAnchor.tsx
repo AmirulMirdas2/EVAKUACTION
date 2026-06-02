@@ -150,17 +150,33 @@ function AnswerAnchorComponent({
               {/* Mini card preview */}
               <div
                 style={{
-                  width: 50,
-                  height: 50,
+                  width: 80,
+                  height: 60,
                   borderRadius: 8,
                   background: `linear-gradient(135deg, ${placeholderColor}44 0%, ${placeholderColor}22 100%)`,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   marginBottom: 6,
+                  overflow: 'hidden',
+                  position: 'relative',
                 }}
               >
-                <span style={{ fontSize: 24 }}>{emoji}</span>
+                <img
+                  src={cardData.image}
+                  alt={cardData.label}
+                  loading="lazy"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                  }}
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none'
+                  }}
+                />
+                {/* Fallback emoji behind image */}
+                <span style={{ fontSize: 24, position: 'absolute', zIndex: -1 }}>{emoji}</span>
               </div>
               <span
                 style={{

@@ -17,25 +17,31 @@ export default function ScoreBoard({ p1Score, p2Score, winner }: ScoreBoardProps
   const [displayP1, setDisplayP1] = useState(0)
   const [displayP2, setDisplayP2] = useState(0)
 
-  // Count-up animation
+  // Count-up animation using requestAnimationFrame
   useEffect(() => {
-    const duration = 1500
-    const steps = 30
-    const interval = duration / steps
+    const duration = 2500
+    const startTime = performance.now()
 
-    let step = 0
-    const timer = setInterval(() => {
-      step++
-      const progress = Math.min(step / steps, 1)
-      // Ease out cubic
-      const eased = 1 - Math.pow(1 - progress, 3)
+    let frameId: number
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      
+      // easeOutQuart for a dramatic slow down at the end
+      const eased = progress === 1 ? 1 : 1 - Math.pow(1 - progress, 4)
+
       setDisplayP1(Math.round(eased * p1Score))
       setDisplayP2(Math.round(eased * p2Score))
 
-      if (step >= steps) clearInterval(timer)
-    }, interval)
+      if (progress < 1) {
+        frameId = requestAnimationFrame(animate)
+      }
+    }
 
-    return () => clearInterval(timer)
+    frameId = requestAnimationFrame(animate)
+
+    return () => cancelAnimationFrame(frameId)
   }, [p1Score, p2Score])
 
   const playerCardStyle = (

@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, memo } from 'react'
 import Card from './Card'
 import type { CardData, JenisBencana } from '../../types/game.types'
 
@@ -18,7 +18,7 @@ interface CardDeckProps {
  * Cards that have been placed in anchor slots are hidden from the deck.
  * Remaining cards are displayed in a 2×2 grid layout.
  */
-export default function CardDeck({
+function CardDeckComponent({
   cards,
   jenisBencana,
   playerColor,
@@ -71,3 +71,6 @@ export default function CardDeck({
     </div>
   )
 }
+
+const CardDeck = memo(CardDeckComponent)
+export default CardDeck

@@ -54,6 +54,69 @@ function Particle({
 }
 
 /**
+ * Floating Card preview for background decoration.
+ */
+function FloatingCard({
+  image,
+  label,
+  color,
+  x,
+  y,
+  rotate,
+  delay,
+}: {
+  image: string
+  label: string
+  color: string
+  x: string
+  y: string
+  rotate: number
+  delay: number
+}) {
+  return (
+    <motion.div
+      initial={{ y: 0, rotate }}
+      animate={{
+        y: [-15, 15, -15],
+        rotate: [rotate - 5, rotate + 5, rotate - 5],
+      }}
+      transition={{
+        duration: 8,
+        delay,
+        repeat: Infinity,
+        ease: 'easeInOut',
+      }}
+      style={{
+        position: 'absolute',
+        left: x,
+        top: y,
+        width: 140,
+        height: 190,
+        borderRadius: 14,
+        backgroundColor: 'rgba(15, 15, 25, 0.6)',
+        border: `2px solid ${color}66`,
+        boxShadow: `0 15px 40px rgba(0,0,0,0.5), 0 0 25px ${color}22`,
+        backdropFilter: 'blur(8px)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        zIndex: 1,
+        pointerEvents: 'none',
+        overflow: 'hidden',
+      }}
+    >
+      <div style={{ width: '100%', height: '75%', position: 'relative' }}>
+        <img src={image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
+      </div>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 8px', background: 'linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.8) 100%)', width: '100%' }}>
+        <span style={{ fontSize: 10, color: '#fff', textAlign: 'center', fontWeight: 600, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{label}</span>
+      </div>
+    </motion.div>
+  )
+}
+
+/**
  * Tutorial modal overlay with 4-step how-to-play guide.
  */
 function TutorialModal({ onClose }: { onClose: () => void }) {
@@ -297,6 +360,12 @@ export default function LandingPage() {
         <Particle key={p.id} {...p} />
       ))}
 
+      {/* Floating Card Previews */}
+      <FloatingCard image="/assets/cards/gempa/berlindung-meja.png" label="Berlindung di Bawah Meja" color="#EAB308" x="12%" y="20%" rotate={-12} delay={0} />
+      <FloatingCard image="/assets/cards/tsunami/lari-dataran-tinggi.png" label="Lari ke Dataran Tinggi" color="#3B82F6" x="8%" y="60%" rotate={15} delay={1.2} />
+      <FloatingCard image="/assets/cards/gunung-api/tas-siaga.png" label="Siapkan Tas Siaga" color="#EF4444" x="80%" y="15%" rotate={18} delay={0.6} />
+      <FloatingCard image="/assets/cards/banjir/mengungsi.png" label="Mengungsi ke Tempat Aman" color="#06B6D4" x="78%" y="65%" rotate={-10} delay={2.1} />
+
       {/* Radial glow behind title */}
       <div
         style={{
@@ -414,15 +483,15 @@ export default function LandingPage() {
           <motion.button
             id="btn-mulai"
             whileHover={{
-              scale: 1.06,
-              boxShadow: '0 8px 40px rgba(245, 158, 11, 0.4)',
+              scale: 1.1,
+              boxShadow: '0 12px 50px rgba(245, 158, 11, 0.5)',
             }}
-            whileTap={{ scale: 0.95 }}
+            whileTap={{ scale: 0.92 }}
             animate={{
               boxShadow: [
-                '0 4px 20px rgba(245, 158, 11, 0.2)',
-                '0 4px 30px rgba(245, 158, 11, 0.35)',
-                '0 4px 20px rgba(245, 158, 11, 0.2)',
+                '0 6px 25px rgba(245, 158, 11, 0.25)',
+                '0 6px 40px rgba(245, 158, 11, 0.45)',
+                '0 6px 25px rgba(245, 158, 11, 0.25)',
               ],
             }}
             transition={{
@@ -434,17 +503,17 @@ export default function LandingPage() {
             }}
             onClick={handleStart}
             style={{
-              padding: '16px 56px',
-              borderRadius: 16,
+              padding: '20px 64px',
+              borderRadius: 20,
               border: 'none',
               background: 'linear-gradient(135deg, #F59E0B 0%, #EF4444 100%)',
               color: '#fff',
-              fontSize: 18,
-              fontWeight: 800,
+              fontSize: 22,
+              fontWeight: 900,
               cursor: 'pointer',
-              letterSpacing: '0.06em',
+              letterSpacing: '0.08em',
               fontFamily: "'Inter', sans-serif",
-              minWidth: 260,
+              minWidth: 320,
             }}
           >
             🎮 MULAI BERMAIN
@@ -484,15 +553,35 @@ export default function LandingPage() {
           transition={{ delay: 0.9, duration: 0.5 }}
           style={{
             marginTop: 48,
-            fontSize: 13,
+            fontSize: 14,
             fontStyle: 'italic',
-            color: 'rgba(255, 255, 255, 0.25)',
+            color: 'rgba(255, 255, 255, 0.4)',
             fontWeight: 400,
           }}
         >
           "Belajar Siaga, Bermain Bersama"
         </motion.p>
       </div>
+
+      {/* Footer */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.2, duration: 0.5 }}
+        style={{
+          position: 'absolute',
+          bottom: 24,
+          textAlign: 'center',
+          color: 'rgba(255, 255, 255, 0.35)',
+          fontSize: 12,
+          fontWeight: 500,
+          letterSpacing: '0.03em',
+          lineHeight: 1.6,
+        }}
+      >
+        <div>Media Pembelajaran IPS Kelas VII SMP | Tema Kesiapsiagaan Bencana</div>
+        <div style={{ color: 'rgba(255, 255, 255, 0.25)' }}>Universitas Syiah Kuala © 2026</div>
+      </motion.div>
 
       {/* Tutorial modal */}
       <AnimatePresence>

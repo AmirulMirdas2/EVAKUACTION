@@ -25,30 +25,29 @@ export default function WinnerAnnouncement({
     if (hasFired.current) return
     hasFired.current = true
 
-    // Fire confetti burst
-    const duration = 2000
+    const duration = 2500
     const end = Date.now() + duration
 
-    const colors =
-      winner === 'player1'
-        ? ['#3B82F6', '#60A5FA', '#93C5FD']
-        : winner === 'player2'
-          ? ['#EF4444', '#F87171', '#FCA5A5']
-          : ['#F59E0B', '#FBBF24', '#FDE68A']
+    // Use a diverse and festive color palette for the confetti
+    const colors = [
+      '#3B82F6', '#60A5FA', '#EF4444', '#F87171',
+      '#F59E0B', '#FBBF24', '#10B981', '#34D399',
+      '#A855F7', '#C084FC', '#EC4899', '#F472B6'
+    ]
 
     const frame = () => {
       confetti({
-        particleCount: 3,
+        particleCount: 8,
         angle: 60,
-        spread: 60,
-        origin: { x: 0, y: 0.7 },
+        spread: 80,
+        origin: { x: 0, y: 0.8 },
         colors,
       })
       confetti({
-        particleCount: 3,
+        particleCount: 8,
         angle: 120,
-        spread: 60,
-        origin: { x: 1, y: 0.7 },
+        spread: 80,
+        origin: { x: 1, y: 0.8 },
         colors,
       })
       if (Date.now() < end) {

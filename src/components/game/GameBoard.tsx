@@ -344,6 +344,16 @@ export default function GameBoard() {
     }
   }, [phase, ronde, currentSoal, setCurrentSoal, shuffledSoalList])
 
+  // Preload images for the current active scenario
+  useEffect(() => {
+    if (currentSoal) {
+      currentSoal.kartu.forEach((kartu) => {
+        const img = new Image()
+        img.src = kartu.image
+      })
+    }
+  }, [currentSoal])
+
   // Timer countdown
   useEffect(() => {
     if (phase === 'playing' && timerEnabled) {
@@ -428,6 +438,29 @@ export default function GameBoard() {
             />
           </div>
         )}
+
+        {/* Sound Indicator (UI Only) */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 24,
+            right: 24,
+            width: 48,
+            height: 48,
+            borderRadius: 16,
+            backgroundColor: 'rgba(0, 0, 0, 0.4)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            pointerEvents: 'auto',
+            zIndex: 50,
+          }}
+        >
+          <span style={{ fontSize: 24 }}>🔊</span>
+        </div>
 
         {/* Player zones — split screen */}
         {currentSoal && (phase === 'playing' || phase === 'evaluation') && (

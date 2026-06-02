@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import type { RondeResult, CardResult, JenisBencana } from '../../types/game.types'
+import type { RondeResult, CardResult, JenisBencana, SoalData } from '../../types/game.types'
 import { BENCANA_LABEL, BENCANA_EMOJI } from '../../types/game.types'
+import soalDataRaw from '../../data/soal.json'
+
+const soalData = soalDataRaw as SoalData[]
 
 interface MistakeAnalysisProps {
   rondeHistory: RondeResult[]
@@ -11,6 +14,16 @@ interface MistakeAnalysisProps {
  * Simplified mistake item for the tabbed layout.
  */
 function MistakeItem({ card }: { card: CardResult }) {
+  // Find card image
+  let image = ''
+  for (const s of soalData) {
+    const c = s.kartu.find(k => k.id === card.cardId)
+    if (c) {
+      image = c.image
+      break
+    }
+  }
+
   return (
     <div
       style={{
@@ -18,28 +31,42 @@ function MistakeItem({ card }: { card: CardResult }) {
         backgroundColor: 'rgba(239, 68, 68, 0.08)',
         border: '1px solid rgba(239, 68, 68, 0.2)',
         padding: '12px 14px',
-        position: 'relative',
         display: 'flex',
-        flexDirection: 'column',
-        gap: 6,
+        gap: 12,
+        alignItems: 'center',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-        <div style={{ color: '#EF4444', fontWeight: 'bold', marginTop: -2 }}>✗</div>
-        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', lineHeight: 1.4 }}>
-          Kartu "{card.cardLabel}"
-        </div>
+      {/* Mini Card Image */}
+      <div style={{ width: 44, height: 60, borderRadius: 6, overflow: 'hidden', flexShrink: 0, border: '1px solid rgba(255,255,255,0.1)', position: 'relative' }}>
+        <img
+          src={image}
+          alt={card.cardLabel}
+          loading="lazy"
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          onError={(e) => { e.currentTarget.style.display = 'none' }}
+        />
+        <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(239,68,68,0.2)', pointerEvents: 'none' }} />
       </div>
-      <div style={{ marginLeft: 20, display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>
-          Kamu letakkan: {card.wrongSlot === null ? (
-            <span style={{ color: '#EF4444' }}>Tidak dijawab</span>
-          ) : (
-            <span style={{ color: '#EF4444' }}>urutan {card.wrongSlot}</span>
-          )}
+
+      {/* Mistake Info */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+          <div style={{ color: '#EF4444', fontWeight: 'bold', marginTop: -2 }}>✗</div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+            "{card.cardLabel}"
+          </div>
         </div>
-        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>
-          Seharusnya: <span style={{ color: '#22C55E' }}>urutan {card.correctSlot}</span>
+        <div style={{ marginLeft: 18, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>
+            Kamu letakkan: {card.wrongSlot === null ? (
+              <span style={{ color: '#EF4444' }}>Tidak dijawab</span>
+            ) : (
+              <span style={{ color: '#EF4444' }}>urutan {card.wrongSlot}</span>
+            )}
+          </div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>
+            Seharusnya: <span style={{ color: '#22C55E' }}>urutan {card.correctSlot}</span>
+          </div>
         </div>
       </div>
     </div>
