@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from 'react'
+import { useEffect, useCallback, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import CameraView from '../camera/CameraView'
@@ -325,6 +325,58 @@ export default function GameBoard() {
 
   const location = useLocation()
 
+  const [showTutorial, setShowTutorial] = useState(false)
+  const [showCountdown, setShowCountdown] = useState(false)
+  const [countdownNum, setCountdownNum] = useState<number | string>(3)
+
+  // Handle refresh and initial onboarding
+  useEffect(() => {
+    // 1. Detect refresh
+    const isReload = performance.getEntriesByType('navigation').some(
+      (n) => (n as PerformanceNavigationTiming).type === 'reload'
+    )
+    if (isReload && ronde > 1) {
+      alert('Sesi berakhir, mulai ulang')
+      window.location.href = '/'
+      return
+    }
+
+    // 2. Show tutorial/countdown on first round
+    if (phase === 'playing' && ronde === 1) {
+      const hasSeenTutorial = localStorage.getItem('evakuaction_tutorial_seen')
+      if (!hasSeenTutorial) {
+        setShowTutorial(true)
+      } else {
+        startCountdown()
+      }
+    } else if (phase === 'playing' && ronde > 1) {
+      startCountdown()
+    }
+  }, [phase, ronde])
+
+  const startCountdown = () => {
+    setShowTutorial(false)
+    setShowCountdown(true)
+    setCountdownNum(3)
+    let count = 3
+    const interval = setInterval(() => {
+      count--
+      if (count > 0) {
+        setCountdownNum(count)
+      } else if (count === 0) {
+        setCountdownNum('MULAI!')
+      } else {
+        clearInterval(interval)
+        setShowCountdown(false)
+      }
+    }, 1000)
+  }
+
+  const handleSkipTutorial = () => {
+    localStorage.setItem('evakuaction_tutorial_seen', 'true')
+    startCountdown()
+  }
+
   // If navigated here with state.reset = true (from ResultPage), reset the game state safely
   useEffect(() => {
     if (location.state?.reset) {
@@ -356,7 +408,7 @@ export default function GameBoard() {
 
   // Timer countdown
   useEffect(() => {
-    if (phase === 'playing' && timerEnabled) {
+    if (phase === 'playing' && timerEnabled && !showTutorial && !showCountdown) {
       timerRef.current = setInterval(() => {
         const state = useGameStore.getState()
         if (state.timeRemaining <= 0) {
@@ -374,7 +426,7 @@ export default function GameBoard() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
     }
-  }, [phase, timerEnabled, decrementTimer, evaluateRonde])
+  }, [phase, timerEnabled, showTutorial, showCountdown, decrementTimer, evaluateRonde])
 
   // Calculate ronde scores for evaluation popup
   const calculateRondeScore = useCallback(
@@ -496,6 +548,100 @@ export default function GameBoard() {
             onNext={handleNextRonde}
             isLastRonde={ronde >= maxRonde}
           />
+        )}
+      </AnimatePresence>
+      {/* ── Layer 4: Tutorial & Countdown Overlays ── */}
+      <AnimatePresence>
+        {showTutorial && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 100,
+              backgroundColor: 'rgba(0, 0, 0, 0.85)',
+              backdropFilter: 'blur(10px)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fff',
+              padding: 32,
+            }}
+          >
+            <h2 style={{ fontSize: 32, fontWeight: 800, marginBottom: 40, color: '#F59E0B' }}>
+              🎓 Tutorial Gestur Tangan
+            </h2>
+            <div style={{ display: 'flex', gap: 40, marginBottom: 60 }}>
+              <div style={{ textAlign: 'center', maxWidth: 200 }}>
+                <div style={{ fontSize: 48, marginBottom: 16 }}>🤏</div>
+                <h3 style={{ fontSize: 18, marginBottom: 8 }}>1. Jepit Kartu</h3>
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>Dekatkan ibu jari dan telunjuk untuk menjepit kartu.</p>
+              </div>
+              <div style={{ textAlign: 'center', maxWidth: 200 }}>
+                <div style={{ fontSize: 48, marginBottom: 16 }}>🖐️</div>
+                <h3 style={{ fontSize: 18, marginBottom: 8 }}>2. Seret ke Slot</h3>
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>Tahan jepitan dan gerakkan tangan untuk meletakkan kartu.</p>
+              </div>
+              <div style={{ textAlign: 'center', maxWidth: 200 }}>
+                <div style={{ fontSize: 48, marginBottom: 16 }}>⏱️</div>
+                <h3 style={{ fontSize: 18, marginBottom: 8 }}>3. Kunci Jawaban</h3>
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>Jepit area SELESAI selama 1.5 detik untuk mengunci jawaban.</p>
+              </div>
+            </div>
+            <button
+              onClick={handleSkipTutorial}
+              style={{
+                padding: '16px 40px',
+                borderRadius: 14,
+                border: 'none',
+                background: 'linear-gradient(135deg, #3B82F6, #2563EB)',
+                color: '#fff',
+                fontSize: 18,
+                fontWeight: 700,
+                cursor: 'pointer',
+                boxShadow: '0 10px 30px rgba(59,130,246,0.4)'
+              }}
+            >
+              Mengerti, Mulai!
+            </button>
+          </motion.div>
+        )}
+
+        {showCountdown && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 90,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <motion.div
+              key={countdownNum}
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1.5, opacity: 1 }}
+              exit={{ scale: 2, opacity: 0 }}
+              transition={{ duration: 0.8 }}
+              style={{
+                fontSize: 120,
+                fontWeight: 900,
+                color: '#F59E0B',
+                textShadow: '0 0 40px rgba(245,158,11,0.5)',
+                fontFamily: "'JetBrains Mono', monospace",
+              }}
+            >
+              {countdownNum}
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

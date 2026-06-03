@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import type { DiagnosticStore, DiagnosticSoal, PilihanJawaban } from '../types/diagnostic.types'
 import diagnosticSoalData from '../data/diagnosticSoal.json'
 
@@ -37,68 +38,79 @@ function buildShuffledDiagnostic(): DiagnosticSoal[] {
  *
  * Questions and their options are shuffled via initDiagnostic().
  */
-export const useDiagnosticStore = create<DiagnosticStore>((set, get) => ({
-  currentQuestion: 0,
-  answers: {},
-  score: 0,
-  isCompleted: false,
-  shuffledQuestions: [],
-
-  initDiagnostic: () =>
-    set({
-      currentQuestion: 0,
-      answers: {},
-      score: 0,
-      isCompleted: false,
-      shuffledQuestions: buildShuffledDiagnostic(),
-    }),
-
-  setAnswer: (id: string, answer: string) =>
-    set((state) => ({
-      answers: { ...state.answers, [id]: answer },
-    })),
-
-  nextQuestion: () =>
-    set((state) => {
-      const shuffled = get().shuffledQuestions
-      const next = state.currentQuestion + 1
-      if (next >= shuffled.length) {
-        // All questions answered — calculate score
-        const answers = get().answers
-        let score = 0
-        for (const soal of shuffled) {
-          if (answers[soal.id] === soal.jawaban_benar) {
-            score++
-          }
-        }
-        return {
-          currentQuestion: next,
-          score,
-          isCompleted: true,
-        }
-      }
-      return { currentQuestion: next }
-    }),
-
-  calculateScore: () =>
-    set(() => {
-      const answers = get().answers
-      const shuffled = get().shuffledQuestions
-      let score = 0
-      for (const soal of shuffled) {
-        if (answers[soal.id] === soal.jawaban_benar) {
-          score++
-        }
-      }
-      return { score, isCompleted: true }
-    }),
-
-  resetDiagnostic: () =>
-    set({
+export const useDiagnosticStore = create<DiagnosticStore>()(
+  persist(
+    (set, get) => ({
       currentQuestion: 0,
       answers: {},
       score: 0,
       isCompleted: false,
       shuffledQuestions: [],
+
+      initDiagnostic: () =>
+        set({
+          currentQuestion: 0,
+          answers: {},
+          score: 0,
+          isCompleted: false,
+          shuffledQuestions: buildShuffledDiagnostic(),
+        }),
+
+      setAnswer: (id: string, answer: string) =>
+        set((state) => ({
+          answers: { ...state.answers, [id]: answer },
+        })),
+
+      nextQuestion: () =>
+        set((state) => {
+          const shuffled = get().shuffledQuestions
+          const next = state.currentQuestion + 1
+          if (next >= shuffled.length) {
+            // All questions answered — calculate score
+            const answers = get().answers
+            let score = 0
+            for (const soal of shuffled) {
+              if (answers[soal.id] === soal.jawaban_benar) {
+                score++
+              }
+            }
+            return {
+              currentQuestion: next,
+              score,
+              isCompleted: true,
+            }
+          }
+          return { currentQuestion: next }
+        }),
+
+      calculateScore: () =>
+        set(() => {
+          const answers = get().answers
+          const shuffled = get().shuffledQuestions
+          let score = 0
+          for (const soal of shuffled) {
+            if (answers[soal.id] === soal.jawaban_benar) {
+              score++
+            }
+          }
+          return { score, isCompleted: true }
+        }),
+
+      resetDiagnostic: () =>
+        set({
+          currentQuestion: 0,
+          answers: {},
+          score: 0,
+          isCompleted: false,
+          shuffledQuestions: [],
+        }),
     }),
-}))
+    {
+      name: 'evakuaction-diagnostic',
+      partialize: (state) => ({
+        isCompleted: state.isCompleted,
+        score: state.score,
+      }),
+    }
+  )
+)

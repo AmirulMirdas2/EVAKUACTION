@@ -119,6 +119,13 @@ export function useMediaPipe(
   const lastP2ZoneRef = useRef<Zone | null>(null)
   const isDetectingRef = useRef<boolean>(false)
 
+  // FPS tracking variables
+  const fpsTrackerRef = useRef({
+    frameCount: 0,
+    lastFpsTime: performance.now(),
+    lowFpsCount: 0,
+  })
+
   const [isLoading, setIsLoading] = useState(true)
   const [isDetecting, setIsDetecting] = useState(false)
 
@@ -136,6 +143,73 @@ export function useMediaPipe(
   const onResults = useCallback(
     (results: MPResults) => {
       const hands: HandData[] = []
+
+      // --- FPS TRACKING ---
+      const tracker = fpsTrackerRef.current
+      tracker.frameCount++
+      const now = performance.now()
+      if (now - tracker.lastFpsTime >= 1000) {
+        const fps = Math.round((tracker.frameCount * 1000) / (now - tracker.lastFpsTime))
+        
+        if (import.meta.env.DEV) {
+          let fpsEl = document.getElementById('mp-fps-counter')
+          if (!fpsEl) {
+            fpsEl = document.createElement('div')
+            fpsEl.id = 'mp-fps-counter'
+            fpsEl.style.position = 'fixed'
+            fpsEl.style.bottom = '10px'
+            fpsEl.style.left = '10px'
+            fpsEl.style.padding = '4px 8px'
+            fpsEl.style.background = 'rgba(0,0,0,0.7)'
+            fpsEl.style.color = '#0f0'
+            fpsEl.style.fontFamily = 'monospace'
+            fpsEl.style.fontSize = '12px'
+            fpsEl.style.zIndex = '9999'
+            fpsEl.style.borderRadius = '4px'
+            document.body.appendChild(fpsEl)
+          }
+          fpsEl.textContent = `CV: ${fps}fps`
+        }
+
+        if (fps < 15) {
+          tracker.lowFpsCount++
+          if (tracker.lowFpsCount >= 3) {
+            let toastEl = document.getElementById('low-fps-toast')
+            if (!toastEl) {
+              toastEl = document.createElement('div')
+              toastEl.id = 'low-fps-toast'
+              toastEl.style.position = 'fixed'
+              toastEl.style.top = '20px'
+              toastEl.style.left = '50%'
+              toastEl.style.transform = 'translateX(-50%)'
+              toastEl.style.background = '#EF4444'
+              toastEl.style.color = '#fff'
+              toastEl.style.padding = '12px 24px'
+              toastEl.style.borderRadius = '8px'
+              toastEl.style.zIndex = '9999'
+              toastEl.style.boxShadow = '0 10px 25px rgba(239, 68, 68, 0.5)'
+              toastEl.style.fontWeight = 'bold'
+              toastEl.style.transition = 'opacity 0.3s'
+              toastEl.innerText = '⚠️ Performa kamera menurun. Pastikan pencahayaan cukup dan tutup aplikasi lain.'
+              document.body.appendChild(toastEl)
+              
+              setTimeout(() => {
+                if (toastEl) {
+                  toastEl.style.opacity = '0'
+                  setTimeout(() => toastEl?.remove(), 300)
+                }
+              }, 5000)
+            }
+            tracker.lowFpsCount = 0
+          }
+        } else {
+          tracker.lowFpsCount = 0
+        }
+
+        tracker.frameCount = 0
+        tracker.lastFpsTime = now
+      }
+      // --------------------
 
       if (results.multiHandLandmarks && results.multiHandedness) {
         for (let i = 0; i < results.multiHandLandmarks.length; i++) {
@@ -349,6 +423,16 @@ export function useMediaPipe(
         const stream = videoRef.current.srcObject as MediaStream
         stream.getTracks().forEach((t) => t.stop())
       }
+
+      // Cleanup live data to prevent memory leak
+      liveHandDataRef.player1 = null
+      liveHandDataRef.player2 = null
+
+      // Cleanup dev UI
+      const fpsEl = document.getElementById('mp-fps-counter')
+      if (fpsEl) fpsEl.remove()
+      const toastEl = document.getElementById('low-fps-toast')
+      if (toastEl) toastEl.remove()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

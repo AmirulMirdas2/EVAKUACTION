@@ -157,32 +157,35 @@ function LoadingOverlay() {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
     >
-      {/* Spinner */}
-      <motion.div
-        className="w-16 h-16 border-4 border-white/20 border-t-blue-500 rounded-full"
-        animate={{ rotate: 360 }}
-        transition={{
-          duration: 1,
-          repeat: Infinity,
-          ease: 'linear',
-        }}
-      />
-
-      <motion.p
-        className="mt-6 text-white text-sm font-medium tracking-wide"
-        animate={{ opacity: [0.5, 1, 0.5] }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }}
-      >
-        Memuat Deteksi Tangan...
-      </motion.p>
-
-      <p className="mt-2 text-gray-400 text-xs">
-        Mengunduh model MediaPipe Hands
-      </p>
+      <div className="flex flex-col items-center p-8 rounded-2xl bg-gray-900/90 border border-gray-700/50 shadow-2xl">
+        <motion.div
+          animate={{ rotate: [-10, 10, -10] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+          className="text-6xl mb-4"
+        >
+          🖐️
+        </motion.div>
+        
+        <h3 className="text-xl font-bold text-white mb-6">Memuat sistem kamera...</h3>
+        
+        {/* Fake progress bar */}
+        <div className="w-64 h-3 bg-gray-800 rounded-full overflow-hidden mb-3 relative">
+          <motion.div 
+            className="absolute top-0 left-0 h-full bg-blue-500 rounded-full"
+            initial={{ width: '0%' }}
+            animate={{ width: '100%' }}
+            transition={{ duration: 3, ease: 'easeInOut' }}
+          />
+        </div>
+        
+        <motion.p
+          className="text-gray-400 text-sm font-medium tracking-wide italic"
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          "Menyiapkan pendeteksi tangan..."
+        </motion.p>
+      </div>
     </motion.div>
   )
 }
@@ -299,30 +302,26 @@ export default function CameraView() {
       <AnimatePresence>
         {cameraStatus === 'unavailable' && (
           <motion.div
-            className="absolute inset-0 flex flex-col items-center justify-center bg-black/90"
-            style={{ zIndex: 50 }}
+            className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md"
+            style={{ zIndex: 60 }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             <div className="text-6xl mb-4">📷</div>
-            <h2 className="text-white text-xl font-bold mb-2">
-              Kamera Tidak Tersedia
-            </h2>
-            <p className="text-gray-400 text-sm text-center max-w-md">
-              Pastikan kamera terhubung dan izin akses kamera telah diberikan.
-              Refresh halaman untuk mencoba kembali.
+            <h3 className="text-2xl font-bold text-red-500 mb-2">
+              Kamera Tidak Dapat Diakses
+            </h3>
+            <p className="text-gray-400 text-center max-w-md px-4 mb-8">
+              Pastikan browser memiliki izin kamera dan tidak ada aplikasi lain yang sedang menggunakannya.
             </p>
             <motion.button
-              className="mt-6 px-6 py-2 rounded-lg text-white font-medium text-sm"
-              style={{
-                background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
-              }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
               onClick={() => window.location.reload()}
+              className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-[0_0_15px_rgba(37,99,235,0.4)]"
+              whileHover={{ scale: 1.05, backgroundColor: '#2563EB' }}
+              whileTap={{ scale: 0.95 }}
             >
-              Refresh Halaman
+              🔄 Coba Lagi
             </motion.button>
           </motion.div>
         )}
