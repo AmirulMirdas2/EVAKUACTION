@@ -81,6 +81,8 @@ function CardComponent({
         position: 'relative',
         userSelect: 'none',
         WebkitUserSelect: 'none',
+        display: 'flex',
+        flexDirection: 'column',
         boxShadow: evaluationResult === 'correct'
           ? '0 0 20px rgba(34, 197, 94, 0.4), 0 4px 12px rgba(0,0,0,0.3)'
           : evaluationResult === 'incorrect'
@@ -100,31 +102,31 @@ function CardComponent({
         ease: [0.34, 1.56, 0.64, 1],
       }}
     >
-      {/* Card image area */}
+      {/* Card image area — uses explicit 65% height so absolute children have a reference */}
       <div
         style={{
           width: '100%',
-          flex: 1, // take remaining space
+          height: '65%',
           background: `linear-gradient(135deg, ${placeholderColor}33 0%, ${placeholderColor}11 100%)`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
           overflow: 'hidden',
+          flexShrink: 0,
         }}
       >
-        {/* Fallback pattern overlay (shows when placeholder is active) */}
+        {/* Fallback placeholder (shows on error/missing image) */}
         {imageError && (
           <div
             style={{
               position: 'absolute',
               inset: 0,
-              backgroundImage: `radial-gradient(circle at 20% 50%, ${placeholderColor}22 0%, transparent 50%), radial-gradient(circle at 80% 30%, ${placeholderColor}18 0%, transparent 40%)`,
+              backgroundColor: placeholderColor ?? '#374151',
+              opacity: 0.3,
             }}
           />
         )}
-
-        {/* Placeholder emoji + label (shows only on error/missing image) */}
         {imageError && (
           <div
             style={{
@@ -136,15 +138,15 @@ function CardComponent({
               gap: 4,
             }}
           >
-            <span style={{ fontSize: 32 }}>{emoji}</span>
+            <span style={{ fontSize: 36 }}>{emoji}</span>
             <span
               style={{
-                fontSize: 8,
-                color: placeholderColor,
+                fontSize: 9,
+                color: '#fff',
                 fontWeight: 600,
                 letterSpacing: '0.05em',
                 textTransform: 'uppercase',
-                opacity: 0.8,
+                opacity: 0.7,
               }}
             >
               {jenisBencana.replace('_', ' ')}
@@ -152,7 +154,7 @@ function CardComponent({
           </div>
         )}
 
-        {/* Skeleton Shimmer */}
+        {/* Skeleton Shimmer — only while loading, removed once loaded */}
         {!imageLoaded && !imageError && (
           <motion.div
             style={{
@@ -173,18 +175,20 @@ function CardComponent({
           />
         )}
 
-        {/* Actual Image */}
+        {/* Actual Image — purely inline styles, no Tailwind class conflicts */}
         {!imageError && (
           <img
             src={card.image}
             alt={card.label}
-            className={`w-full object-cover rounded-t-lg transition-opacity duration-300 ${
-              imageLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
             style={{
+              width: '100%',
               height: '100%',
+              objectFit: 'cover',
               position: 'absolute',
-              inset: 0,
+              top: 0,
+              left: 0,
+              opacity: imageLoaded ? 1 : 0,
+              transition: 'opacity 0.3s ease-in-out',
               zIndex: 4,
             }}
             onLoad={() => setImageLoaded(true)}
@@ -224,7 +228,7 @@ function CardComponent({
         style={{
           padding: '8px 8px',
           background: 'rgba(0,0,0,0.8)',
-          minHeight: 64,
+          flex: 1,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
