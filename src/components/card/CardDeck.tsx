@@ -42,11 +42,11 @@ function CardDeckComponent({
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(2, 120px)',
-        gap: 12,
+        gridTemplateColumns: 'repeat(2, 160px)',
+        gap: 16, // gap-4 (equivalent to roughly gap-3/gap-4 in tailwind, 16px is better for 160px cards)
         justifyContent: 'center',
         padding: '8px 0',
-        minHeight: 172, // 160 + gap to prevent layout shift
+        minHeight: 224, // 208 + 16 gap
         alignContent: 'start',
       }}
     >

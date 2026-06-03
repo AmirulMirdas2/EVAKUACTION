@@ -1,7 +1,7 @@
 import { useEffect, useRef, memo } from 'react'
 import { motion } from 'framer-motion'
 import type { CardData, JenisBencana, CardPosition } from '../../types/game.types'
-import { BENCANA_COLORS, BENCANA_EMOJI } from '../../types/game.types'
+import Card from './Card'
 
 interface AnswerAnchorProps {
   slot: number
@@ -65,9 +65,6 @@ function AnswerAnchorComponent({
     return () => window.removeEventListener('resize', handleResize)
   }, [slot, onRegister])
 
-  const placeholderColor = BENCANA_COLORS[jenisBencana]
-  const emoji = BENCANA_EMOJI[jenisBencana]
-
   // Determine border styling
   let borderStyle = '2px dashed rgba(255, 255, 255, 0.2)'
   let bgColor = 'rgba(255, 255, 255, 0.03)'
@@ -101,8 +98,8 @@ function AnswerAnchorComponent({
         data-anchor-player={player}
         className="answer-anchor"
         style={{
-          width: 130,
-          height: 170,
+          width: 175,
+          height: 225,
           borderRadius: 14,
           border: borderStyle,
           backgroundColor: bgColor,
@@ -116,8 +113,25 @@ function AnswerAnchorComponent({
           overflow: 'hidden',
         }}
         initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3, delay: slot * 0.08 }}
+        animate={
+          evaluationResult === 'incorrect' && !placedCard
+            ? {
+                opacity: 1,
+                scale: 1,
+                borderColor: ['#EF4444', 'rgba(239, 68, 68, 0.2)', '#EF4444'],
+                boxShadow: [
+                  '0 0 15px rgba(239, 68, 68, 0.3)',
+                  '0 0 0px rgba(239, 68, 68, 0)',
+                  '0 0 15px rgba(239, 68, 68, 0.3)',
+                ],
+              }
+            : { opacity: 1, scale: 1 }
+        }
+        transition={
+          evaluationResult === 'incorrect' && !placedCard
+            ? { duration: 1, repeat: Infinity, ease: "easeInOut" }
+            : { duration: 0.3, delay: slot * 0.08 }
+        }
       >
         {placedCard && cardData ? (
           /* ── Filled state: show placed card info ── */
@@ -145,81 +159,15 @@ function AnswerAnchorComponent({
             {/* ── Front Face ── */}
             <div style={{
               position: 'absolute', inset: 0, backfaceVisibility: 'hidden',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 8
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
             }}>
-              {/* Mini card preview */}
-              <div
-                style={{
-                  width: 80,
-                  height: 60,
-                  borderRadius: 8,
-                  background: `linear-gradient(135deg, ${placeholderColor}44 0%, ${placeholderColor}22 100%)`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: 6,
-                  overflow: 'hidden',
-                  position: 'relative',
-                }}
-              >
-                <img
-                  src={cardData.image}
-                  alt={cardData.label}
-                  loading="lazy"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                  }}
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none'
-                  }}
-                />
-                {/* Fallback emoji behind image */}
-                <span style={{ fontSize: 24, position: 'absolute', zIndex: -1 }}>{emoji}</span>
-              </div>
-              <span
-                style={{
-                  fontSize: 8,
-                  color: 'rgba(255,255,255,0.8)',
-                  textAlign: 'center',
-                  lineHeight: 1.3,
-                  display: '-webkit-box',
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                  fontWeight: 500,
-                }}
-              >
-                {cardData.label}
-              </span>
-
-              {/* Evaluation badge */}
-              {evaluationResult && (
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 12 }}
-                  style={{
-                    position: 'absolute',
-                    top: 6,
-                    right: 6,
-                    width: 22,
-                    height: 22,
-                    borderRadius: '50%',
-                    backgroundColor: evaluationResult === 'correct' ? '#22C55E' : '#EF4444',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 13,
-                    fontWeight: 700,
-                    color: '#fff',
-                    boxShadow: `0 0 10px ${evaluationResult === 'correct' ? 'rgba(34,197,94,0.5)' : 'rgba(239,68,68,0.5)'}`,
-                  }}
-                >
-                  {evaluationResult === 'correct' ? '✓' : '✗'}
-                </motion.div>
-              )}
+              <Card
+                card={cardData}
+                jenisBencana={jenisBencana}
+                playerColor={playerColor}
+                isPlaced={true}
+                evaluationResult={evaluationResult}
+              />
             </div>
 
             {/* ── Back Face (Face Down) ── */}
@@ -239,7 +187,7 @@ function AnswerAnchorComponent({
             {/* Slot number */}
             <span
               style={{
-                fontSize: 32,
+                fontSize: 48, // bigger
                 fontWeight: 800,
                 color: 'rgba(255, 255, 255, 0.12)',
                 fontFamily: "'Inter', sans-serif",
@@ -281,10 +229,10 @@ function AnswerAnchorComponent({
       {/* Step label */}
       <span
         style={{
-          fontSize: 10,
-          color: 'rgba(255, 255, 255, 0.4)',
-          fontWeight: 600,
-          letterSpacing: '0.03em',
+          fontSize: 14, // text-sm
+          color: 'rgba(255, 255, 255, 0.5)',
+          fontWeight: 700, // font-bold
+          letterSpacing: '0.05em',
         }}
       >
         Langkah {slot}

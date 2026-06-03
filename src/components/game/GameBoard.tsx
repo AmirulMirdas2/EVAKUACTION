@@ -5,7 +5,7 @@ import CameraView from '../camera/CameraView'
 import PlayerZone from './PlayerZone'
 import ScenarioDisplay from './ScenarioDisplay'
 import { useGameStore } from '../../stores/gameStore'
-import type { SoalData } from '../../types/game.types'
+import type { SoalData, CardPosition } from '../../types/game.types'
 import { BENCANA_COLORS, BENCANA_EMOJI } from '../../types/game.types'
 
 /**
@@ -15,12 +15,16 @@ function EvaluationPopup({
   soal,
   p1Score,
   p2Score,
+  p1Cards,
+  p2Cards,
   onNext,
   isLastRonde,
 }: {
   soal: SoalData
   p1Score: number
   p2Score: number
+  p1Cards: CardPosition[]
+  p2Cards: CardPosition[]
   onNext: () => void
   isLastRonde: boolean
 }) {
@@ -50,12 +54,13 @@ function EvaluationPopup({
         exit={{ opacity: 0, scale: 0.9, y: -20 }}
         transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
         style={{
-          maxWidth: 560,
-          width: '90%',
+          maxWidth: 900,
+          width: '80%',
+          minHeight: 400,
           borderRadius: 20,
           background: 'linear-gradient(180deg, rgba(15, 15, 30, 0.97) 0%, rgba(10, 10, 25, 0.97) 100%)',
           border: `1px solid ${color}44`,
-          padding: '28px 32px',
+          padding: '32px 48px',
           boxShadow: `0 20px 60px rgba(0,0,0,0.5), 0 0 30px ${color}15`,
           overflow: 'hidden',
           position: 'relative',
@@ -76,28 +81,19 @@ function EvaluationPopup({
         />
 
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: 20 }}>
-          <span style={{ fontSize: 40 }}>{emoji}</span>
+        <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <h2
             style={{
-              fontSize: 20,
+              fontSize: 32,
               fontWeight: 800,
               color: '#fff',
               margin: '8px 0 4px',
               letterSpacing: '0.02em',
+              textTransform: 'uppercase'
             }}
           >
-            Evaluasi Ronde
+            {emoji} EVALUASI — {soal.jenis_bencana.replace('_', ' ')}
           </h2>
-          <p
-            style={{
-              fontSize: 12,
-              color: 'rgba(255,255,255,0.5)',
-              fontWeight: 500,
-            }}
-          >
-            Berikut penjelasan ilmiah prosedur yang benar
-          </p>
         </div>
 
         {/* Score comparison */}
@@ -167,33 +163,117 @@ function EvaluationPopup({
           </div>
         </div>
 
-        {/* Scientific explanation */}
+        {/* Correct order */}
         <div
           style={{
-            padding: '14px 16px',
-            borderRadius: 12,
-            backgroundColor: `${color}0D`,
-            border: `1px solid ${color}22`,
-            marginBottom: 20,
+            marginBottom: 24,
+            padding: '24px 32px',
+            borderRadius: 16,
+            backgroundColor: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.08)',
           }}
         >
           <div
             style={{
-              fontSize: 9,
+              fontSize: 16,
+              fontWeight: 700,
+              color: 'rgba(255,255,255,0.6)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              marginBottom: 16,
+            }}
+          >
+            📋 URUTAN YANG BENAR
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {soal.kartu
+              .slice()
+              .sort((a, b) => a.urutan_benar - b.urutan_benar)
+              .map((card) => {
+                const p1Placed = p1Cards.find(c => c.id === card.id)
+                const p2Placed = p2Cards.find(c => c.id === card.id)
+                const p1Correct = p1Placed && p1Placed.anchorSlot === card.urutan_benar
+                const p2Correct = p2Placed && p2Placed.anchorSlot === card.urutan_benar
+
+                return (
+                  <div
+                    key={card.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 16,
+                      padding: '8px 0',
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 8,
+                        backgroundColor: '#22C55E22',
+                        border: '1px solid #22C55E44',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 16,
+                        fontWeight: 700,
+                        color: '#22C55E',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {card.urutan_benar}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 18,
+                        fontWeight: 500,
+                        color: '#fff',
+                        flex: 1,
+                      }}
+                    >
+                      {card.label}
+                    </span>
+                    <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                      <span style={{ fontSize: 16, color: p1Correct ? '#22C55E' : '#EF4444', fontWeight: 600 }}>
+                        {p1Correct ? '✓ P1' : '✗ P1'}
+                      </span>
+                      <span style={{ fontSize: 16, color: p2Correct ? '#22C55E' : '#EF4444', fontWeight: 600 }}>
+                        {p2Correct ? '✓ P2' : '✗ P2'}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
+          </div>
+        </div>
+
+        {/* Scientific explanation */}
+        <div
+          style={{
+            padding: '24px 32px',
+            borderRadius: 16,
+            backgroundColor: `${color}0D`,
+            border: `1px solid ${color}22`,
+            marginBottom: 32,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 16,
               fontWeight: 700,
               color: color,
               textTransform: 'uppercase',
               letterSpacing: '0.08em',
-              marginBottom: 8,
+              marginBottom: 12,
             }}
           >
-            💡 Penjelasan Ilmiah
+            📖 PENJELASAN
           </div>
           <p
             style={{
-              fontSize: 12,
-              lineHeight: 1.7,
-              color: 'rgba(255,255,255,0.75)',
+              fontSize: 20,
+              lineHeight: 1.8,
+              color: 'rgba(255,255,255,0.9)',
               margin: 0,
             }}
           >
@@ -201,93 +281,27 @@ function EvaluationPopup({
           </p>
         </div>
 
-        {/* Correct order */}
-        <div
-          style={{
-            marginBottom: 20,
-            padding: '12px 16px',
-            borderRadius: 12,
-            backgroundColor: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
-          }}
-        >
-          <div
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onNext}
             style={{
-              fontSize: 9,
-              fontWeight: 700,
-              color: 'rgba(255,255,255,0.4)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              marginBottom: 8,
+              padding: '16px 48px',
+              borderRadius: 16,
+              border: 'none',
+              background: '#22C55E',
+              color: '#fff',
+              fontSize: 20,
+              fontWeight: 800,
+              cursor: 'pointer',
+              letterSpacing: '0.04em',
+              boxShadow: `0 4px 20px rgba(34, 197, 94, 0.4)`,
             }}
           >
-            📋 Urutan Yang Benar
-          </div>
-          {soal.kartu
-            .slice()
-            .sort((a, b) => a.urutan_benar - b.urutan_benar)
-            .map((card) => (
-              <div
-                key={card.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  padding: '4px 0',
-                }}
-              >
-                <span
-                  style={{
-                    width: 20,
-                    height: 20,
-                    borderRadius: 6,
-                    backgroundColor: '#22C55E22',
-                    border: '1px solid #22C55E44',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 10,
-                    fontWeight: 700,
-                    color: '#22C55E',
-                    flexShrink: 0,
-                  }}
-                >
-                  {card.urutan_benar}
-                </span>
-                <span
-                  style={{
-                    fontSize: 11,
-                    color: 'rgba(255,255,255,0.7)',
-                    lineHeight: 1.4,
-                  }}
-                >
-                  {card.label}
-                </span>
-              </div>
-            ))}
+            {isLastRonde ? '🏁 LIHAT HASIL AKHIR' : '➡️ LANJUT KE RONDE BERIKUTNYA'}
+          </motion.button>
         </div>
-
-        {/* Next button */}
-        <motion.button
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={onNext}
-          style={{
-            width: '100%',
-            padding: '12px 24px',
-            borderRadius: 12,
-            border: 'none',
-            background: `linear-gradient(135deg, ${color} 0%, ${color}BB 100%)`,
-            color: '#fff',
-            fontSize: 14,
-            fontWeight: 700,
-            cursor: 'pointer',
-            letterSpacing: '0.04em',
-            boxShadow: `0 4px 16px ${color}33`,
-          }}
-        >
-          {isLastRonde ? '🏁 Lihat Hasil Akhir' : '➡️ Ronde Berikutnya'}
-        </motion.button>
       </motion.div>
     </motion.div>
   )
@@ -322,12 +336,14 @@ export default function GameBoard() {
   const evaluateRonde = useGameStore((s) => s.evaluateRonde)
   const shuffledSoalList = useGameStore((s) => s.shuffledSoalList)
   const resetGame = useGameStore((s) => s.resetGame)
+  const setPhase = useGameStore((s) => s.setPhase)
 
   const location = useLocation()
 
   const [showTutorial, setShowTutorial] = useState(false)
   const [showCountdown, setShowCountdown] = useState(false)
   const [countdownNum, setCountdownNum] = useState<number | string>(3)
+  const [resultCountdown, setResultCountdown] = useState<number | null>(null)
 
   // Handle refresh and initial onboarding
   useEffect(() => {
@@ -376,6 +392,25 @@ export default function GameBoard() {
     localStorage.setItem('evakuaction_tutorial_seen', 'true')
     startCountdown()
   }
+
+  // Handle showing_result phase
+  useEffect(() => {
+    if (phase === 'showing_result') {
+      setResultCountdown(3)
+      let count = 3
+      const interval = setInterval(() => {
+        count--
+        if (count > 0) {
+          setResultCountdown(count)
+        } else {
+          clearInterval(interval)
+          setResultCountdown(null)
+          setPhase('evaluation')
+        }
+      }, 1000)
+      return () => clearInterval(interval)
+    }
+  }, [phase, setPhase])
 
   // If navigated here with state.reset = true (from ResultPage), reset the game state safely
   useEffect(() => {
@@ -515,7 +550,7 @@ export default function GameBoard() {
         </div>
 
         {/* Player zones — split screen */}
-        {currentSoal && (phase === 'playing' || phase === 'evaluation') && (
+        {currentSoal && (phase === 'playing' || phase === 'showing_result' || phase === 'evaluation') && (
           <div
             style={{
               position: 'absolute',
@@ -527,12 +562,12 @@ export default function GameBoard() {
             <PlayerZone
               player="player1"
               soal={currentSoal}
-              isEvaluation={phase === 'evaluation'}
+              isEvaluation={phase === 'showing_result' || phase === 'evaluation'}
             />
             <PlayerZone
               player="player2"
               soal={currentSoal}
-              isEvaluation={phase === 'evaluation'}
+              isEvaluation={phase === 'showing_result' || phase === 'evaluation'}
             />
           </div>
         )}
@@ -545,6 +580,8 @@ export default function GameBoard() {
             soal={currentSoal}
             p1Score={calculateRondeScore(player1.cardsPlaced)}
             p2Score={calculateRondeScore(player2.cardsPlaced)}
+            p1Cards={player1.cardsPlaced}
+            p2Cards={player2.cardsPlaced}
             onNext={handleNextRonde}
             isLastRonde={ronde >= maxRonde}
           />
@@ -641,6 +678,54 @@ export default function GameBoard() {
             >
               {countdownNum}
             </motion.div>
+          </motion.div>
+        )}
+
+        {/* showing_result phase overlay */}
+        {phase === 'showing_result' && resultCountdown !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 55,
+              backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              pointerEvents: 'none',
+            }}
+          >
+            <motion.div
+              key={resultCountdown}
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1.2, opacity: 1 }}
+              exit={{ scale: 1.5, opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              style={{
+                width: 120,
+                height: 120,
+                borderRadius: '50%',
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                border: '4px solid #F59E0B',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 64,
+                fontWeight: 900,
+                color: '#F59E0B',
+                marginBottom: 24,
+                boxShadow: '0 0 40px rgba(245,158,11,0.5)',
+              }}
+            >
+              {resultCountdown}
+            </motion.div>
+            <span style={{ fontSize: 24, fontWeight: 700, color: '#fff', letterSpacing: '0.05em', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
+              Perhatikan hasil jawabanmu...
+            </span>
           </motion.div>
         )}
       </AnimatePresence>

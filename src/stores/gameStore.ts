@@ -249,7 +249,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         const isLastRonde = state.ronde >= state.maxRonde
 
         return {
-          phase: 'evaluation',
+          phase: 'showing_result',
           player1: {
             ...state.player1,
             score: state.player1.score + p1Score,

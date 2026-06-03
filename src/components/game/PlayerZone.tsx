@@ -251,6 +251,100 @@ export default function PlayerZone({ player, soal, isEvaluation }: PlayerZonePro
         {soal.jenis_bencana.replace('_', ' ')} — RONDE {useGameStore((s) => s.ronde)}
       </div>
 
+      {/* ── Gesture "Selesai" Zone ── */}
+      {allSlotsFilled && !playerState.isReady && phase === 'playing' && (
+        <motion.div
+          ref={selesaiZoneRef}
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          style={{
+            width: '100%',
+            height: 64,
+            marginBottom: 16,
+            padding: '8px 24px',
+            borderRadius: 16,
+            background: `linear-gradient(135deg, ${playerColor}33 0%, ${playerColor}66 100%)`,
+            border: `2px solid ${playerColor}AA`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 16,
+            position: 'relative',
+            zIndex: 10,
+            transition: 'transform 0.1s, box-shadow 0.1s',
+          }}
+        >
+          {/* Animated pulsing background when idle */}
+          <motion.div
+            animate={{ opacity: [0.3, 0.6, 0.3] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              borderRadius: 16,
+              background: playerColor,
+              filter: 'blur(8px)',
+              zIndex: -1,
+            }}
+          />
+          
+          {/* Progress Circular Icon */}
+          <div style={{ position: 'relative', width: 32, height: 32 }}>
+            <svg width="32" height="32" viewBox="0 0 36 36" style={{ transform: 'rotate(-90deg)' }}>
+              <circle cx="18" cy="18" r="16" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="4" />
+              <circle
+                ref={progressCircleRef}
+                cx="18" cy="18" r="16" fill="none" stroke="#fff" strokeWidth="4"
+                strokeDasharray="100" strokeDashoffset="100"
+                style={{ transition: 'stroke-dashoffset 0.05s linear' }}
+              />
+            </svg>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>
+              ✊
+            </div>
+          </div>
+
+          <span style={{ fontSize: 18, fontWeight: 800, color: '#fff', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            JEPIT SELESAI
+          </span>
+        </motion.div>
+      )}
+
+      {/* ── Ready Status / Waiting indicator ── */}
+      {playerState.isReady && phase === 'playing' && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1, backgroundColor: isSelesaiFlashing ? 'rgba(34, 197, 94, 0.8)' : 'rgba(34, 197, 94, 0.15)' }}
+          transition={{ duration: 0.3 }}
+          style={{
+            width: '100%',
+            height: 64,
+            marginBottom: 16,
+            padding: '12px 24px',
+            borderRadius: 16,
+            border: '2px solid rgba(34, 197, 94, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 12,
+            zIndex: 10,
+          }}
+        >
+          <span style={{ fontSize: 24 }}>✓</span>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <span style={{ fontSize: 16, fontWeight: 800, color: '#22C55E' }}>SIAP!</span>
+            <motion.span
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              style={{ fontSize: 12, color: '#22C55E', opacity: 0.8 }}
+            >
+              Menunggu lawan...
+            </motion.span>
+          </div>
+        </motion.div>
+      )}
+
       {/* ── Card Deck Area ── */}
       <div
         style={{
@@ -312,94 +406,7 @@ export default function PlayerZone({ player, soal, isEvaluation }: PlayerZonePro
         })}
       </div>
 
-      {/* ── Gesture "Selesai" Zone ── */}
-      {allSlotsFilled && !playerState.isReady && phase === 'playing' && (
-        <motion.div
-          ref={selesaiZoneRef}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-          style={{
-            marginTop: 16,
-            width: '80%',
-            maxWidth: 300,
-            padding: '12px 24px',
-            borderRadius: 16,
-            background: `linear-gradient(135deg, ${playerColor}22 0%, ${playerColor}44 100%)`,
-            border: `2px solid ${playerColor}88`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 16,
-            position: 'relative',
-            transition: 'transform 0.1s, box-shadow 0.1s',
-          }}
-        >
-          {/* Animated pulsing background when idle */}
-          <motion.div
-            animate={{ opacity: [0.3, 0.6, 0.3] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            style={{
-              position: 'absolute',
-              inset: 0,
-              borderRadius: 16,
-              background: playerColor,
-              filter: 'blur(10px)',
-              zIndex: -1,
-            }}
-          />
-          
-          {/* Progress Circular Icon */}
-          <div style={{ position: 'relative', width: 32, height: 32 }}>
-            <svg width="32" height="32" viewBox="0 0 36 36" style={{ transform: 'rotate(-90deg)' }}>
-              <circle cx="18" cy="18" r="16" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="4" />
-              <circle
-                ref={progressCircleRef}
-                cx="18" cy="18" r="16" fill="none" stroke="#fff" strokeWidth="4"
-                strokeDasharray="100" strokeDashoffset="100"
-                style={{ transition: 'stroke-dashoffset 0.05s linear' }}
-              />
-            </svg>
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>
-              ✊
-            </div>
-          </div>
 
-          <span style={{ fontSize: 16, fontWeight: 700, color: '#fff', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-            Jepit untuk Selesai
-          </span>
-        </motion.div>
-      )}
-
-      {/* ── Ready Status / Waiting indicator ── */}
-      {playerState.isReady && phase === 'playing' && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1, backgroundColor: isSelesaiFlashing ? 'rgba(34, 197, 94, 0.8)' : 'rgba(34, 197, 94, 0.15)' }}
-          transition={{ duration: 0.3 }}
-          style={{
-            marginTop: 16,
-            padding: '12px 24px',
-            borderRadius: 16,
-            border: '2px solid rgba(34, 197, 94, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-          }}
-        >
-          <span style={{ fontSize: 18 }}>✓</span>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#22C55E' }}>SIAP!</span>
-            <motion.span
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-              style={{ fontSize: 11, color: '#22C55E', opacity: 0.8 }}
-            >
-              Menunggu lawan...
-            </motion.span>
-          </div>
-        </motion.div>
-      )}
     </motion.div>
   )
 }

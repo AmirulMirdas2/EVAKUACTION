@@ -9,7 +9,6 @@ import type {
 import {
   DEFAULT_MEDIAPIPE_CONFIG,
   DEFAULT_ZONE_BOUNDARIES,
-  PINCH_THRESHOLD,
 } from '../types/gesture.types'
 import { useGestureStore, liveHandDataRef } from '../stores/gestureStore'
 
@@ -85,13 +84,6 @@ function getZone(
   if (effectiveX < boundaries.leftEnd) return 'left'
   if (effectiveX > boundaries.rightStart) return 'right'
   return 'buffer'
-}
-
-/**
- * Calculate the Euclidean distance between two landmarks (2D, normalized).
- */
-function landmarkDistance(a: Landmark, b: Landmark): number {
-  return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2)
 }
 
 /**
@@ -223,14 +215,23 @@ export function useMediaPipe(
           }))
 
           // Landmark indices: 4 = thumb tip, 8 = index finger tip
-          const thumbTip = landmarks[4]
-          const indexTip = landmarks[8]
-          const pinchDistance = landmarkDistance(thumbTip, indexTip)
-          const isPinching = pinchDistance < PINCH_THRESHOLD
+          const THUMB_TIP = 4
+          const INDEX_TIP = 8
+          const thumbTip = landmarks[THUMB_TIP]
+          const indexTip = landmarks[INDEX_TIP]
+          
+          // Hitung pinch distance HANYA antara landmark 4 dan 8
+          const pinchDistance = Math.sqrt(
+            Math.pow(thumbTip.x - indexTip.x, 2) +
+            Math.pow(thumbTip.y - indexTip.y, 2)
+          )
+          const isPinching = pinchDistance < 0.05 // PINCH_THRESHOLD is 0.05
 
-          const indexTipX = indexTip.x
-          const indexTipY = indexTip.y
-          const zone = getZone(indexTipX, boundaries, mergedConfig.mirrorMode)
+          // Posisi "kursor" saat drag: titik TENGAH antara jempol dan telunjuk
+          const cursorX = (thumbTip.x + indexTip.x) / 2
+          const cursorY = (thumbTip.y + indexTip.y) / 2
+          
+          const zone = getZone(cursorX, boundaries, mergedConfig.mirrorMode)
 
           // MediaPipe reports handedness from the camera's perspective.
           // When mirrored, 'Right' in data appears on the left side of screen.
@@ -241,8 +242,8 @@ export function useMediaPipe(
             landmarks,
             pinchDistance,
             isPinching,
-            indexTipX,
-            indexTipY,
+            indexTipX: cursorX, // Map to the new cursor position
+            indexTipY: cursorY,
             zone,
           })
         }

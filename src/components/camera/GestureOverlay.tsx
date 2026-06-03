@@ -103,12 +103,15 @@ export default function GestureOverlay({
         })
 
         // Draw connections (skeleton)
-        ctx.strokeStyle = color
-        ctx.lineWidth = 3
         ctx.lineCap = 'round'
-        ctx.globalAlpha = 0.8
 
         for (const [start, end] of HAND_CONNECTIONS) {
+          // Check if connection is part of thumb (1-4), index (5-8) or wrist (0)
+          const isThumbOrIndex = (start <= 8 && end <= 8)
+          ctx.strokeStyle = color
+          ctx.lineWidth = isThumbOrIndex ? 4 : 2
+          ctx.globalAlpha = isThumbOrIndex ? 0.9 : 0.2
+
           const p1 = points[start]
           const p2 = points[end]
           ctx.beginPath()
@@ -118,22 +121,25 @@ export default function GestureOverlay({
         }
 
         // Draw landmark dots
-        ctx.globalAlpha = 1.0
         for (let i = 0; i < points.length; i++) {
           const p = points[i]
-          const isFingerTip = [4, 8, 12, 16, 20].includes(i)
-          const radius = isFingerTip ? 6 : 4
+          const isThumbOrIndex = i <= 8
+          const isTargetTip = i === 4 || i === 8
+
+          ctx.globalAlpha = isThumbOrIndex ? 1.0 : 0.2
+          const radius = isTargetTip ? 10 : (isThumbOrIndex ? 5 : 3)
 
           ctx.beginPath()
           ctx.arc(p.x, p.y, radius, 0, Math.PI * 2)
-          ctx.fillStyle = isFingerTip ? '#FFFFFF' : color
+          ctx.fillStyle = isTargetTip ? '#FBBF24' : (isThumbOrIndex ? '#FFFFFF' : color)
           ctx.fill()
           ctx.strokeStyle = color
-          ctx.lineWidth = 2
+          ctx.lineWidth = isTargetTip ? 3 : 2
           ctx.stroke()
         }
 
         // Draw pinch indicator
+        ctx.globalAlpha = 1.0
         const thumbTip = points[4]
         const indexTip = points[8]
         const pinchCenterX = (thumbTip.x + indexTip.x) / 2
@@ -142,23 +148,23 @@ export default function GestureOverlay({
         if (hand.isPinching) {
           // Glowing pinch indicator when pinching
           ctx.beginPath()
-          ctx.arc(pinchCenterX, pinchCenterY, 18, 0, Math.PI * 2)
+          ctx.arc(pinchCenterX, pinchCenterY, 20, 0, Math.PI * 2)
           const gradient = ctx.createRadialGradient(
             pinchCenterX, pinchCenterY, 0,
-            pinchCenterX, pinchCenterY, 18
+            pinchCenterX, pinchCenterY, 20
           )
-          gradient.addColorStop(0, color)
-          gradient.addColorStop(0.6, color + 'AA')
-          gradient.addColorStop(1, color + '00')
+          gradient.addColorStop(0, '#FDE047') // Bright yellow
+          gradient.addColorStop(0.5, '#FBBF24AA')
+          gradient.addColorStop(1, '#F59E0B00')
           ctx.fillStyle = gradient
           ctx.fill()
 
           // Inner bright circle
           ctx.beginPath()
           ctx.arc(pinchCenterX, pinchCenterY, 8, 0, Math.PI * 2)
-          ctx.fillStyle = '#FFFFFF'
+          ctx.fillStyle = '#FEF08A'
           ctx.fill()
-          ctx.strokeStyle = color
+          ctx.strokeStyle = '#F59E0B'
           ctx.lineWidth = 3
           ctx.stroke()
 

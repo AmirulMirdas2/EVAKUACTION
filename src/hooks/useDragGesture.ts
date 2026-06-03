@@ -33,8 +33,8 @@ interface AnchorRect {
 }
 
 // Card dimensions (must match Card.tsx)
-const CARD_WIDTH = 120
-const CARD_HEIGHT = 160
+const CARD_WIDTH = 160
+const CARD_HEIGHT = 208
 const CARD_HALF_W = CARD_WIDTH / 2
 const CARD_HALF_H = CARD_HEIGHT / 2
 
@@ -84,8 +84,6 @@ export function useDragGesture(
           cardEl.style.position = ''
           cardEl.style.left = ''
           cardEl.style.top = ''
-          cardEl.style.width = ''
-          cardEl.style.height = ''
           cardEl.style.zIndex = ''
           cardEl.style.margin = ''
           cardEl.style.transform = ''
@@ -361,12 +359,11 @@ export function useDragGesture(
                 ds.element.style.position = ''
                 ds.element.style.left = ''
                 ds.element.style.top = ''
-                ds.element.style.width = ''
-                ds.element.style.height = ''
                 ds.element.style.zIndex = ''
                 ds.element.style.margin = ''
                 ds.element.style.transform = ''
                 ds.element.style.transition = ''
+                ds.element.style.opacity = ''
               }
             }, 450)
           }
@@ -394,12 +391,11 @@ export function useDragGesture(
               el.style.position = ''
               el.style.left = ''
               el.style.top = ''
-              el.style.width = ''
-              el.style.height = ''
               el.style.zIndex = ''
               el.style.margin = ''
               el.style.transform = ''
               el.style.transition = ''
+              el.style.opacity = ''
             }
           }, 450)
 

@@ -65,7 +65,7 @@ export interface RondeResult {
 }
 
 /** Phase permainan */
-export type GamePhase = 'diagnostic' | 'playing' | 'evaluation' | 'result'
+export type GamePhase = 'diagnostic' | 'playing' | 'showing_result' | 'evaluation' | 'result'
 
 /** State per player */
 export interface PlayerState {

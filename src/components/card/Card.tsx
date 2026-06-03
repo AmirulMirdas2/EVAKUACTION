@@ -70,8 +70,8 @@ function CardComponent({
       data-card-id={card.id}
       className={`card-component ${isPlaced ? 'card-placed' : ''}`}
       style={{
-        width: 120,
-        height: 160,
+        width: isPlaced ? '100%' : 160,
+        height: isPlaced ? '100%' : 208,
         borderRadius: 12,
         border: `2px solid ${borderColor}`,
         backgroundColor: 'rgba(15, 15, 25, 0.9)',
@@ -100,11 +100,11 @@ function CardComponent({
         ease: [0.34, 1.56, 0.64, 1],
       }}
     >
-      {/* Card image area / placeholder (80% of 160 = 128px) */}
+      {/* Card image area */}
       <div
         style={{
           width: '100%',
-          height: 128,
+          flex: 1, // take remaining space
           background: `linear-gradient(135deg, ${placeholderColor}33 0%, ${placeholderColor}11 100%)`,
           display: 'flex',
           alignItems: 'center',
@@ -113,7 +113,7 @@ function CardComponent({
           overflow: 'hidden',
         }}
       >
-        {/* Subtle pattern overlay (shows when placeholder is active) */}
+        {/* Fallback pattern overlay (shows when placeholder is active) */}
         {imageError && (
           <div
             style={{
@@ -178,22 +178,17 @@ function CardComponent({
           <img
             src={card.image}
             alt={card.label}
-            loading="lazy"
+            className={`w-full object-cover rounded-t-lg transition-opacity duration-300 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
             style={{
-              width: '100%',
               height: '100%',
-              objectFit: 'cover',
               position: 'absolute',
               inset: 0,
-              opacity: imageLoaded ? 1 : 0,
-              transition: 'opacity 0.3s ease-in-out',
               zIndex: 4,
             }}
             onLoad={() => setImageLoaded(true)}
-            onError={(e) => {
-              setImageError(true)
-              e.currentTarget.style.display = 'none'
-            }}
+            onError={() => setImageError(true)}
           />
         )}
 
@@ -227,9 +222,9 @@ function CardComponent({
       {/* Card label */}
       <div
         style={{
-          padding: '4px 6px',
-          background: 'linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.9) 100%)',
-          height: 32,
+          padding: '8px 8px',
+          background: 'rgba(0,0,0,0.8)',
+          minHeight: 64,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -237,12 +232,12 @@ function CardComponent({
       >
         <span
           style={{
-            fontSize: 9,
-            lineHeight: 1.2,
-            color: 'rgba(255,255,255,0.9)',
-            fontWeight: 500,
+            fontSize: 14,
+            lineHeight: 1.3,
+            color: '#fff',
+            fontWeight: 600,
             display: '-webkit-box',
-            WebkitLineClamp: 2,
+            WebkitLineClamp: 3,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
