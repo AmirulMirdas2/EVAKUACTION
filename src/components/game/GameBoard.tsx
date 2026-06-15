@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import CameraView from '../camera/CameraView'
 import PlayerZone from './PlayerZone'
 import ScenarioDisplay from './ScenarioDisplay'
+import TutorialOverlay from '../tutorial/TutorialOverlay'
 import { useGameStore } from '../../stores/gameStore'
 import type { SoalData, CardPosition } from '../../types/game.types'
 import { BENCANA_COLORS, BENCANA_EMOJI } from '../../types/game.types'
@@ -340,7 +341,7 @@ export default function GameBoard() {
 
   const location = useLocation()
 
-  const [showTutorial, setShowTutorial] = useState(false)
+  const [showTutorial, setShowTutorial] = useState(true)
   const [showCountdown, setShowCountdown] = useState(false)
   const [countdownNum, setCountdownNum] = useState<number | string>(3)
   const [resultCountdown, setResultCountdown] = useState<number | null>(null)
@@ -357,14 +358,11 @@ export default function GameBoard() {
       return
     }
 
-    // 2. Show tutorial/countdown on first round
+    // 2. Show tutorial on first round, countdown on subsequent rounds
     if (phase === 'playing' && ronde === 1) {
-      const hasSeenTutorial = localStorage.getItem('evakuaction_tutorial_seen')
-      if (!hasSeenTutorial) {
-        setShowTutorial(true)
-      } else {
-        startCountdown()
-      }
+      // Always show tutorial on ronde 1.
+      // TutorialOverlay handles skip-button timing via localStorage internally.
+      setShowTutorial(true)
     } else if (phase === 'playing' && ronde > 1) {
       startCountdown()
     }
@@ -389,7 +387,7 @@ export default function GameBoard() {
   }
 
   const handleSkipTutorial = () => {
-    localStorage.setItem('evakuaction_tutorial_seen', 'true')
+    localStorage.setItem('evakuaction-tutorial-seen', 'true')
     startCountdown()
   }
 
@@ -549,8 +547,8 @@ export default function GameBoard() {
           <span style={{ fontSize: 24 }}>🔊</span>
         </div>
 
-        {/* Player zones — split screen */}
-        {currentSoal && (phase === 'playing' || phase === 'showing_result' || phase === 'evaluation') && (
+        {/* Player zones — split screen (hidden during tutorial to prevent interference) */}
+        {currentSoal && !showTutorial && (phase === 'playing' || phase === 'showing_result' || phase === 'evaluation') && (
           <div
             style={{
               position: 'absolute',
@@ -590,61 +588,11 @@ export default function GameBoard() {
       {/* ── Layer 4: Tutorial & Countdown Overlays ── */}
       <AnimatePresence>
         {showTutorial && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-              position: 'absolute',
-              inset: 0,
-              zIndex: 100,
-              backgroundColor: 'rgba(0, 0, 0, 0.85)',
-              backdropFilter: 'blur(10px)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#fff',
-              padding: 32,
+          <TutorialOverlay
+            onComplete={() => {
+              handleSkipTutorial()
             }}
-          >
-            <h2 style={{ fontSize: 32, fontWeight: 800, marginBottom: 40, color: '#F59E0B' }}>
-              🎓 Tutorial Gestur Tangan
-            </h2>
-            <div style={{ display: 'flex', gap: 40, marginBottom: 60 }}>
-              <div style={{ textAlign: 'center', maxWidth: 200 }}>
-                <div style={{ fontSize: 48, marginBottom: 16 }}>🤏</div>
-                <h3 style={{ fontSize: 18, marginBottom: 8 }}>1. Jepit Kartu</h3>
-                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>Dekatkan ibu jari dan telunjuk untuk menjepit kartu.</p>
-              </div>
-              <div style={{ textAlign: 'center', maxWidth: 200 }}>
-                <div style={{ fontSize: 48, marginBottom: 16 }}>🖐️</div>
-                <h3 style={{ fontSize: 18, marginBottom: 8 }}>2. Seret ke Slot</h3>
-                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>Tahan jepitan dan gerakkan tangan untuk meletakkan kartu.</p>
-              </div>
-              <div style={{ textAlign: 'center', maxWidth: 200 }}>
-                <div style={{ fontSize: 48, marginBottom: 16 }}>⏱️</div>
-                <h3 style={{ fontSize: 18, marginBottom: 8 }}>3. Kunci Jawaban</h3>
-                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>Jepit area SELESAI selama 1.5 detik untuk mengunci jawaban.</p>
-              </div>
-            </div>
-            <button
-              onClick={handleSkipTutorial}
-              style={{
-                padding: '16px 40px',
-                borderRadius: 14,
-                border: 'none',
-                background: 'linear-gradient(135deg, #3B82F6, #2563EB)',
-                color: '#fff',
-                fontSize: 18,
-                fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: '0 10px 30px rgba(59,130,246,0.4)'
-              }}
-            >
-              Mengerti, Mulai!
-            </button>
-          </motion.div>
+          />
         )}
 
         {showCountdown && (

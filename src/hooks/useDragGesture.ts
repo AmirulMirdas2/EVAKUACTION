@@ -344,28 +344,13 @@ export function useDragGesture(
             useGameStore.getState().placeCard(player, ds.cardId, droppedSlot)
             // placedCardsRef will be updated via useEffect when cardsPlaced changes
           } else {
-            // ── Return card to origin with spring animation ──
-            ds.element.style.transition = 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)'
-            ds.element.style.left = `${ds.originRect.left}px`
-            ds.element.style.top = `${ds.originRect.top}px`
+            // ── Card stays at current position (user can re-pinch to continue) ──
+            ds.element.style.transition = 'transform 0.2s ease-out, opacity 0.2s ease-out'
             ds.element.style.transform = 'scale(1)'
             ds.element.style.opacity = '1'
             ds.element.style.zIndex = '10'
             ds.element.classList.remove('card-dragging')
-
-            // After animation completes, reset to flow layout
-            setTimeout(() => {
-              if (ds.element && !ds.element.classList.contains('card-placed')) {
-                ds.element.style.position = ''
-                ds.element.style.left = ''
-                ds.element.style.top = ''
-                ds.element.style.zIndex = ''
-                ds.element.style.margin = ''
-                ds.element.style.transform = ''
-                ds.element.style.transition = ''
-                ds.element.style.opacity = ''
-              }
-            }, 450)
+            // Keep position: fixed at current left/top so user can re-grab
           }
 
           dragStateRef.current = null
@@ -373,31 +358,15 @@ export function useDragGesture(
 
         lastPinchRef.current = isPinching
       } else {
-        // No hand detected — if was dragging, return card to origin
+        // No hand detected — if was dragging, keep card at current position
         if (lastPinchRef.current && dragStateRef.current?.isDragging) {
           const ds = dragStateRef.current
-          ds.element.style.transition = 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)'
-          ds.element.style.left = `${ds.originRect.left}px`
-          ds.element.style.top = `${ds.originRect.top}px`
+          ds.element.style.transition = 'transform 0.2s ease-out, opacity 0.2s ease-out'
           ds.element.style.transform = 'scale(1)'
           ds.element.style.opacity = '1'
           ds.element.style.zIndex = '10'
           ds.element.classList.remove('card-dragging')
-
-          // Reset to flow layout after animation
-          const el = ds.element
-          setTimeout(() => {
-            if (el && !el.classList.contains('card-placed')) {
-              el.style.position = ''
-              el.style.left = ''
-              el.style.top = ''
-              el.style.zIndex = ''
-              el.style.margin = ''
-              el.style.transform = ''
-              el.style.transition = ''
-              el.style.opacity = ''
-            }
-          }, 450)
+          // Keep position: fixed at current left/top so user can re-grab
 
           dragStateRef.current = null
         }

@@ -71,7 +71,8 @@ function CardComponent({
       className={`card-component ${isPlaced ? 'card-placed' : ''}`}
       style={{
         width: isPlaced ? '100%' : 160,
-        height: isPlaced ? '100%' : 208,
+        minHeight: isPlaced ? '100%' : 208,
+        height: isPlaced ? '100%' : 'auto',
         borderRadius: 12,
         border: `2px solid ${borderColor}`,
         backgroundColor: 'rgba(15, 15, 25, 0.9)',
@@ -102,11 +103,11 @@ function CardComponent({
         ease: [0.34, 1.56, 0.64, 1],
       }}
     >
-      {/* Card image area — uses explicit 65% height so absolute children have a reference */}
+      {/* Card image area — fixed 120px height, flex-shrink-0 so it doesn't compress */}
       <div
         style={{
           width: '100%',
-          height: '65%',
+          height: 120,
           background: `linear-gradient(135deg, ${placeholderColor}33 0%, ${placeholderColor}11 100%)`,
           display: 'flex',
           alignItems: 'center',
@@ -223,33 +224,32 @@ function CardComponent({
         )}
       </div>
 
-      {/* Card label */}
+      {/* Card label — flex-grow, text wraps fully without truncation */}
       <div
         style={{
           padding: '8px 8px',
-          background: 'rgba(0,0,0,0.8)',
-          flex: 1,
+          background: 'rgba(0,0,0,0.85)',
+          flexGrow: 1,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        <span
+        <p
           style={{
             fontSize: 14,
             lineHeight: 1.3,
             color: '#fff',
             fontWeight: 600,
-            display: '-webkit-box',
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
             textAlign: 'center',
+            wordBreak: 'break-word',
+            whiteSpace: 'normal',
+            display: 'block',
+            margin: 0,
           }}
         >
           {card.label}
-        </span>
+        </p>
       </div>
 
       {/* Player color accent bar at bottom */}

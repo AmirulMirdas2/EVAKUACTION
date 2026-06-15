@@ -99,7 +99,8 @@ function AnswerAnchorComponent({
         className="answer-anchor"
         style={{
           width: 175,
-          height: 225,
+          minHeight: 225,
+          height: 'auto',
           borderRadius: 14,
           border: borderStyle,
           backgroundColor: bgColor,
