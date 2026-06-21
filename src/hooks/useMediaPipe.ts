@@ -111,6 +111,15 @@ export function useMediaPipe(
   const lastP2ZoneRef = useRef<Zone | null>(null)
   const isDetectingRef = useRef<boolean>(false)
 
+  // Anti-sabotage: track which hand (by handedness) is "locked" to each zone.
+  // Once a hand enters a zone, only that same handedness is accepted.
+  // This prevents the opponent from reaching into the other player's zone.
+  const lockedP1HandednessRef = useRef<'Left' | 'Right' | null>(null)
+  const lockedP2HandednessRef = useRef<'Left' | 'Right' | null>(null)
+  const p1LockLostTimeRef = useRef<number>(0)
+  const p2LockLostTimeRef = useRef<number>(0)
+  const LOCK_EXPIRY_MS = 500 // Lock expires 500ms after the locked hand leaves
+
   // FPS tracking variables
   const fpsTrackerRef = useRef({
     frameCount: 0,
@@ -252,17 +261,92 @@ export function useMediaPipe(
       // Update ref (no re-render)
       handsDataRef.current = hands
 
-      // Determine which hands map to which players based on zone
+      // ── Anti-sabotage hand assignment ──
+      // Each zone locks to the first hand (by handedness) that enters it.
+      // Additional hands in the same zone are ignored to prevent sabotage.
       let p1Hand: HandData | null = null
       let p2Hand: HandData | null = null
 
-      for (const hand of hands) {
-        if (hand.zone === 'left' && !p1Hand) {
-          p1Hand = hand
-        } else if (hand.zone === 'right' && !p2Hand) {
-          p2Hand = hand
+      // Collect hands per zone
+      const leftHands = hands.filter(h => h.zone === 'left')
+      const rightHands = hands.filter(h => h.zone === 'right')
+
+      // --- Player 1 (left zone) ---
+      if (leftHands.length > 0) {
+        if (lockedP1HandednessRef.current) {
+          // Zone is locked: only accept the hand matching the locked handedness
+          const lockedHand = leftHands.find(h => h.handedness === lockedP1HandednessRef.current)
+          if (lockedHand) {
+            p1Hand = lockedHand
+            p1LockLostTimeRef.current = 0 // Reset lost timer
+          } else {
+            // Locked hand left the zone, but another hand is here — ignore it
+            // Start expiry timer if not already started
+            if (p1LockLostTimeRef.current === 0) {
+              p1LockLostTimeRef.current = performance.now()
+            } else if (performance.now() - p1LockLostTimeRef.current > LOCK_EXPIRY_MS) {
+              // Lock expired — allow re-locking to the first available hand
+              lockedP1HandednessRef.current = leftHands[0].handedness
+              p1Hand = leftHands[0]
+              p1LockLostTimeRef.current = 0
+            }
+            // Otherwise: do NOT assign any hand (sabotage blocked)
+          }
+        } else {
+          // No lock yet — lock to the first hand in the zone
+          lockedP1HandednessRef.current = leftHands[0].handedness
+          p1Hand = leftHands[0]
+          p1LockLostTimeRef.current = 0
         }
-        // Hands in 'buffer' zone are ignored
+      } else {
+        // No hands in left zone
+        if (lockedP1HandednessRef.current) {
+          if (p1LockLostTimeRef.current === 0) {
+            p1LockLostTimeRef.current = performance.now()
+          } else if (performance.now() - p1LockLostTimeRef.current > LOCK_EXPIRY_MS) {
+            // Lock expired after hand left
+            lockedP1HandednessRef.current = null
+            p1LockLostTimeRef.current = 0
+          }
+        }
+      }
+
+      // --- Player 2 (right zone) ---
+      if (rightHands.length > 0) {
+        if (lockedP2HandednessRef.current) {
+          // Zone is locked: only accept the hand matching the locked handedness
+          const lockedHand = rightHands.find(h => h.handedness === lockedP2HandednessRef.current)
+          if (lockedHand) {
+            p2Hand = lockedHand
+            p2LockLostTimeRef.current = 0 // Reset lost timer
+          } else {
+            // Locked hand left the zone, but another hand is here — ignore it
+            if (p2LockLostTimeRef.current === 0) {
+              p2LockLostTimeRef.current = performance.now()
+            } else if (performance.now() - p2LockLostTimeRef.current > LOCK_EXPIRY_MS) {
+              // Lock expired — allow re-locking
+              lockedP2HandednessRef.current = rightHands[0].handedness
+              p2Hand = rightHands[0]
+              p2LockLostTimeRef.current = 0
+            }
+          }
+        } else {
+          // No lock yet — lock to the first hand in the zone
+          lockedP2HandednessRef.current = rightHands[0].handedness
+          p2Hand = rightHands[0]
+          p2LockLostTimeRef.current = 0
+        }
+      } else {
+        // No hands in right zone
+        if (lockedP2HandednessRef.current) {
+          if (p2LockLostTimeRef.current === 0) {
+            p2LockLostTimeRef.current = performance.now()
+          } else if (performance.now() - p2LockLostTimeRef.current > LOCK_EXPIRY_MS) {
+            // Lock expired after hand left
+            lockedP2HandednessRef.current = null
+            p2LockLostTimeRef.current = 0
+          }
+        }
       }
       // ── Update live hand data ref EVERY FRAME (non-reactive) ──
       // This is read by useDragGesture in its rAF loop for real-time tracking.

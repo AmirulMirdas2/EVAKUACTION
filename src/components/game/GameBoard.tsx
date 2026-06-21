@@ -511,19 +511,6 @@ export default function GameBoard() {
           pointerEvents: 'none',
         }}
       >
-        {/* Scenario Display (shared, top center) */}
-        {currentSoal && phase === 'playing' && (
-          <div style={{ pointerEvents: 'auto' }}>
-            <ScenarioDisplay
-              soal={currentSoal}
-              ronde={ronde}
-              maxRonde={maxRonde}
-              timeRemaining={timeRemaining}
-              timerEnabled={timerEnabled}
-            />
-          </div>
-        )}
-
         {/* Sound Indicator (UI Only) */}
         <div
           style={{
@@ -570,6 +557,17 @@ export default function GameBoard() {
           </div>
         )}
       </div>
+
+      {/* ── Layer 2.5: Scenario Display (centered, above player zones) ── */}
+      {currentSoal && phase === 'playing' && (
+        <ScenarioDisplay
+          soal={currentSoal}
+          ronde={ronde}
+          maxRonde={maxRonde}
+          timeRemaining={timeRemaining}
+          timerEnabled={timerEnabled}
+        />
+      )}
 
       {/* ── Layer 3: Evaluation popup overlay ── */}
       <AnimatePresence>

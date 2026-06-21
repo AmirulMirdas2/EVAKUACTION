@@ -33,37 +33,45 @@ export default function ScenarioDisplay({
 
   return (
     <AnimatePresence mode="wait">
-      <motion.div
-        key={soal.id}
-        initial={{ opacity: 0, y: -40 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+      <div
+        key={`wrapper-${soal.id}`}
         style={{
-          position: 'absolute',
-          top: 0,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 40,
-          width: '100%',
-          maxWidth: 720,
-          padding: '12px 16px',
+          position: 'fixed',
+          inset: 0,
+          zIndex: 80,
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
-          gap: 8,
+          justifyContent: 'center',
+          pointerEvents: 'none',
         }}
       >
+        <motion.div
+          key={soal.id}
+          initial={{ opacity: 0, y: -40 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+          style={{
+            width: '100%',
+            maxWidth: 720,
+            padding: '16px 24px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 10,
+            pointerEvents: 'none',
+          }}
+        >
         {/* Main scenario card */}
         <div
           style={{
             width: '100%',
-            borderRadius: 16,
-            background: 'linear-gradient(180deg, rgba(10, 10, 20, 0.92) 0%, rgba(10, 10, 20, 0.85) 100%)',
-            backdropFilter: 'blur(16px)',
-            border: `1px solid ${color}33`,
-            padding: '14px 20px',
-            boxShadow: `0 8px 32px rgba(0,0,0,0.4), 0 0 20px ${color}15`,
+            borderRadius: 20,
+            background: 'linear-gradient(180deg, rgba(10, 10, 20, 0.95) 0%, rgba(10, 10, 20, 0.90) 100%)',
+            backdropFilter: 'blur(20px)',
+            border: `2px solid ${color}44`,
+            padding: '20px 28px',
+            boxShadow: `0 12px 48px rgba(0,0,0,0.5), 0 0 30px ${color}20`,
           }}
         >
           {/* Top row: badge + ronde indicator */}
@@ -72,7 +80,7 @@ export default function ScenarioDisplay({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              marginBottom: 10,
+              marginBottom: 14,
             }}
           >
             {/* Disaster type badge */}
@@ -80,17 +88,17 @@ export default function ScenarioDisplay({
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 8,
-                padding: '4px 12px 4px 8px',
-                borderRadius: 20,
-                backgroundColor: `${color}20`,
-                border: `1px solid ${color}44`,
+                gap: 10,
+                padding: '6px 16px 6px 10px',
+                borderRadius: 24,
+                backgroundColor: `${color}25`,
+                border: `1px solid ${color}55`,
               }}
             >
-              <span style={{ fontSize: 18 }}>{emoji}</span>
+              <span style={{ fontSize: 24 }}>{emoji}</span>
               <span
                 style={{
-                  fontSize: 11,
+                  fontSize: 15,
                   fontWeight: 700,
                   color: color,
                   letterSpacing: '0.04em',
@@ -102,7 +110,7 @@ export default function ScenarioDisplay({
             </div>
 
             {/* Ronde indicator + Timer */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               {/* Timer */}
               {timerEnabled && (
                 <motion.div
@@ -119,9 +127,9 @@ export default function ScenarioDisplay({
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 4,
-                    padding: '4px 10px',
-                    borderRadius: 20,
+                    gap: 6,
+                    padding: '6px 14px',
+                    borderRadius: 24,
                     backgroundColor: isTimeCritical
                       ? 'rgba(239, 68, 68, 0.2)'
                       : isTimeWarning
@@ -136,10 +144,10 @@ export default function ScenarioDisplay({
                     }`,
                   }}
                 >
-                  <span style={{ fontSize: 12 }}>⏱️</span>
+                  <span style={{ fontSize: 16 }}>⏱️</span>
                   <span
                     style={{
-                      fontSize: 13,
+                      fontSize: 16,
                       fontWeight: 700,
                       fontFamily: "'JetBrains Mono', monospace",
                       color: isTimeCritical
@@ -157,11 +165,11 @@ export default function ScenarioDisplay({
               {/* Ronde */}
               <div
                 style={{
-                  padding: '4px 10px',
-                  borderRadius: 20,
+                  padding: '6px 14px',
+                  borderRadius: 24,
                   backgroundColor: 'rgba(255,255,255,0.08)',
                   border: '1px solid rgba(255,255,255,0.15)',
-                  fontSize: 11,
+                  fontSize: 14,
                   fontWeight: 600,
                   color: 'rgba(255,255,255,0.6)',
                   letterSpacing: '0.03em',
@@ -173,23 +181,23 @@ export default function ScenarioDisplay({
           </div>
 
           {/* Scenario text */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
             <div
               style={{
-                width: 4,
-                minHeight: 36,
-                borderRadius: 2,
+                width: 5,
+                minHeight: 44,
+                borderRadius: 3,
                 background: `linear-gradient(180deg, ${color} 0%, ${color}44 100%)`,
                 flexShrink: 0,
-                marginTop: 2,
+                marginTop: 3,
               }}
             />
             <p
               style={{
-                fontSize: 13,
-                lineHeight: 1.6,
-                color: 'rgba(255, 255, 255, 0.88)',
-                fontWeight: 400,
+                fontSize: 20,
+                lineHeight: 1.7,
+                color: 'rgba(255, 255, 255, 0.92)',
+                fontWeight: 500,
                 margin: 0,
               }}
             >
@@ -200,10 +208,10 @@ export default function ScenarioDisplay({
           {/* Instruction hint */}
           <div
             style={{
-              marginTop: 10,
+              marginTop: 14,
               textAlign: 'center',
-              fontSize: 10,
-              color: 'rgba(255, 255, 255, 0.35)',
+              fontSize: 13,
+              color: 'rgba(255, 255, 255, 0.4)',
               fontWeight: 500,
               letterSpacing: '0.05em',
             }}
@@ -212,6 +220,7 @@ export default function ScenarioDisplay({
           </div>
         </div>
       </motion.div>
+      </div>
     </AnimatePresence>
   )
 }

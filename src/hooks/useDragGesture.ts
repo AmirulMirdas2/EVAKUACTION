@@ -241,6 +241,25 @@ export function useDragGesture(
     const processGesture = () => {
       if (!running) return
 
+      // ── Blokir interaksi drag saat bukan fase 'playing' ──
+      // Saat evaluasi atau showing_result, kartu tidak boleh di-drag
+      const currentPhase = useGameStore.getState().phase
+      if (currentPhase !== 'playing') {
+        // Jika ada kartu yang sedang di-drag, lepaskan secara paksa
+        if (dragStateRef.current?.isDragging) {
+          const ds = dragStateRef.current
+          ds.element.style.transition = 'transform 0.2s ease-out, opacity 0.2s ease-out'
+          ds.element.style.transform = 'scale(1)'
+          ds.element.style.opacity = '1'
+          ds.element.style.zIndex = '10'
+          ds.element.classList.remove('card-dragging')
+          dragStateRef.current = null
+        }
+        lastPinchRef.current = false
+        rafRef.current = requestAnimationFrame(processGesture)
+        return
+      }
+
       // ── Read live hand data (updated every frame by useMediaPipe) ──
       const hand = player === 'player1' ? liveHandDataRef.player1 : liveHandDataRef.player2
       const isPinching = hand?.isPinching ?? false

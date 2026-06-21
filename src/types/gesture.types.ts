@@ -91,7 +91,7 @@ export const DEFAULT_PLAYER_COLORS: PlayerColors = {
  * Default MediaPipe configuration.
  */
 export const DEFAULT_MEDIAPIPE_CONFIG: MediaPipeConfig = {
-  maxNumHands: 2,
+  maxNumHands: 4,
   minDetectionConfidence: 0.7,
   minTrackingConfidence: 0.5,
   modelComplexity: 1,

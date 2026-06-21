@@ -172,7 +172,7 @@ export default function PlayerZone({ player, soal, isEvaluation }: PlayerZonePro
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'flex-start',
-        padding: '100px 12px 16px',
+        padding: '24px 12px 16px',
         position: 'relative',
         overflow: 'hidden',
       }}

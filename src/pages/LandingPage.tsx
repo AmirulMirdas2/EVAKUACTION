@@ -413,14 +413,23 @@ export default function LandingPage() {
           padding: '0 24px',
         }}
       >
-        {/* Volcano emoji */}
+        {/* Logo */}
         <motion.div
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, duration: 0.5, type: 'spring', stiffness: 200 }}
-          style={{ fontSize: 56, marginBottom: 16 }}
+          style={{ marginBottom: 16 }}
         >
-          🌋
+          <img
+            src="/assets/LOGO.png"
+            alt="EVAKUACTION Logo"
+            style={{
+              width: 120,
+              height: 120,
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 0 20px rgba(245, 158, 11, 0.3))',
+            }}
+          />
         </motion.div>
 
         {/* Title */}
