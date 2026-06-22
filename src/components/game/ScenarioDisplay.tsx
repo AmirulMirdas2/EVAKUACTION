@@ -64,6 +64,7 @@ export default function ScenarioDisplay({
         >
         {/* Main scenario card */}
         <div
+          id="scenario-card"
           style={{
             width: '100%',
             borderRadius: 20,

@@ -5,6 +5,7 @@ import CameraView from '../camera/CameraView'
 import PlayerZone from './PlayerZone'
 import ScenarioDisplay from './ScenarioDisplay'
 import TutorialOverlay from '../tutorial/TutorialOverlay'
+import DisasterEffectLayer from '../effects/DisasterEffectLayer'
 import { useGameStore } from '../../stores/gameStore'
 import type { SoalData, CardPosition } from '../../types/game.types'
 import { BENCANA_COLORS, BENCANA_EMOJI } from '../../types/game.types'
@@ -501,6 +502,9 @@ export default function GameBoard() {
       <div style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
         <CameraView />
       </div>
+
+      {/* ── Layer 1.5: Ambient Disaster Effects ── */}
+      <DisasterEffectLayer />
 
       {/* ── Layer 2: Game overlay ── */}
       <div
