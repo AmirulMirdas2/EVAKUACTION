@@ -6,6 +6,8 @@ import PlayerZone from './PlayerZone'
 import ScenarioDisplay from './ScenarioDisplay'
 import TutorialOverlay from '../tutorial/TutorialOverlay'
 import DisasterEffectLayer from '../effects/DisasterEffectLayer'
+import EarthquakeSurvivalChallenge from '../survival/EarthquakeSurvivalChallenge'
+import type { StageScore } from '../survival/EarthquakeSurvivalChallenge'
 import { useGameStore } from '../../stores/gameStore'
 import type { SoalData, CardPosition } from '../../types/game.types'
 import { BENCANA_COLORS, BENCANA_EMOJI } from '../../types/game.types'
@@ -346,6 +348,20 @@ export default function GameBoard() {
   const [showCountdown, setShowCountdown] = useState(false)
   const [countdownNum, setCountdownNum] = useState<number | string>(3)
   const [resultCountdown, setResultCountdown] = useState<number | null>(null)
+  const [showSurvivalChallenge, setShowSurvivalChallenge] = useState(false)
+  const [survivalCompleteCount, setSurvivalCompleteCount] = useState(0)
+
+  // Register global startEarthquakeChallenge() API
+  useEffect(() => {
+    (window as any).startEarthquakeChallenge = () => {
+      setSurvivalCompleteCount(0)
+      setShowSurvivalChallenge(true)
+      setPhase('survival_challenge')
+    }
+    return () => {
+      delete (window as any).startEarthquakeChallenge
+    }
+  }, [setPhase])
 
   // Handle refresh and initial onboarding
   useEffect(() => {
@@ -478,9 +494,36 @@ export default function GameBoard() {
     [currentSoal]
   )
 
-  // Handle next round
+  // Handle survival challenge completion
+  const handleSurvivalComplete = useCallback((_totalScore: number, _stageScores: StageScore[]) => {
+    setSurvivalCompleteCount(prev => {
+      const next = prev + 1
+      if (next >= 2) {
+        // Both players finished
+        setTimeout(() => {
+          setShowSurvivalChallenge(false)
+          setSurvivalCompleteCount(0)
+          // Continue to next round or result
+          const state = useGameStore.getState()
+          if (state.ronde >= state.maxRonde) {
+            navigate('/result')
+          } else {
+            nextRonde()
+          }
+        }, 1500)
+      }
+      return next
+    })
+  }, [navigate, nextRonde])
+
+  // Handle next round — check if current soal is earthquake-themed for survival challenge
   const handleNextRonde = () => {
-    if (ronde >= maxRonde) {
+    if (currentSoal?.jenis_bencana === 'gempa') {
+      // Show survival challenge for earthquake rounds
+      setSurvivalCompleteCount(0)
+      setShowSurvivalChallenge(true)
+      setPhase('survival_challenge')
+    } else if (ronde >= maxRonde) {
       // Game finished — navigate to result page
       navigate('/result')
     } else {
@@ -499,7 +542,7 @@ export default function GameBoard() {
       }}
     >
       {/* ── Layer 1: Camera background ── */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
+      <div style={{ position: 'absolute', inset: 0 }}>
         <CameraView />
       </div>
 
@@ -585,6 +628,50 @@ export default function GameBoard() {
             onNext={handleNextRonde}
             isLastRonde={ronde >= maxRonde}
           />
+        )}
+      </AnimatePresence>
+
+      {/* ── Layer 3.5: Earthquake Survival Challenge ── */}
+      <AnimatePresence>
+        {showSurvivalChallenge && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 100,
+              display: 'flex',
+              backgroundColor: 'rgba(10, 10, 26, 0.85)',
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            {/* Split Screen Separator */}
+            <div style={{
+              position: 'absolute',
+              left: '50%',
+              top: 0,
+              bottom: 0,
+              width: 2,
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              zIndex: 110,
+              transform: 'translateX(-50%)',
+            }} />
+
+            <div style={{ position: 'relative', width: '50%', height: '100%', overflow: 'hidden' }}>
+              <EarthquakeSurvivalChallenge
+                player="player1"
+                onComplete={handleSurvivalComplete}
+              />
+            </div>
+            <div style={{ position: 'relative', width: '50%', height: '100%', overflow: 'hidden' }}>
+              <EarthquakeSurvivalChallenge
+                player="player2"
+                onComplete={handleSurvivalComplete}
+              />
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
       {/* ── Layer 4: Tutorial & Countdown Overlays ── */}
